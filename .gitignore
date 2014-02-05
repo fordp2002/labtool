@@ -9,3 +9,7 @@ LabTool-build-desktop-Qt_4_8_1_for_Desktop_-_MinGW__Qt_SDK__Release/
 fw/program/uVision/Internal_SRAM/
 fw/program/uVision/*.dep
 fw/program/uVision/firmware.uvgui.*
+*.o
+
+# QT Debug Directory
+build-LabTool-Desktop_Qt_5_2_0_MinGW_32bit-Debug/
