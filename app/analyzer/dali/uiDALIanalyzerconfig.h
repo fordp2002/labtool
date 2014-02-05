@@ -53,14 +53,7 @@ public slots:
 private:
 
     QComboBox* mSignalBox;
-    QComboBox* mFormatBox;
-    QComboBox* mDataBitsBox;
-    QComboBox* mParityBox;
-    QLineEdit* mBaudRate;
-    QComboBox* mStopBitsBox;
     QComboBox* mCursorBox;
-
-    
 };
 
 #endif // UIDALIANALYZERCONFIG_H

@@ -82,12 +82,6 @@ public:
     void setBaudRate(int rate) {if (rate > 0) mBaudRate = rate;}
     int baudRate() const {return mBaudRate;}
 
-    void setStopBits(int bits) {if (bits > 0) mStopBits = bits;}
-    int stopBits() const {return mStopBits;}
-
-    void setDataBits(int bits) {if (bits > 0) mDataBits = bits;}
-    int dataBits() const {return mDataBits;}
-
     void setSyncCursor(UiCursor::CursorId id) {mSyncCursor = id;}
     UiCursor::CursorId syncCursor() const {return mSyncCursor;}
 
@@ -121,8 +115,6 @@ private:
     static int DALIAnalyzerCounter;
     int mSignalId;
     int mBaudRate;
-    int mDataBits;
-    int mStopBits;
 
     UiCursor::CursorId mSyncCursor;
 

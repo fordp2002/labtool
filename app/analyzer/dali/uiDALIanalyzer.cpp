@@ -51,9 +51,8 @@ UiDALIAnalyzer::UiDALIAnalyzer(QWidget *parent) :
     UiAnalyzer(parent)
 {
     mSignalId = -1;
-    mBaudRate = 115200;
-    mDataBits = 8;
-    mStopBits = 1;
+    mBaudRate = 2400;
+
     //mFormat = Types::DataFormatAscii;
     mSyncCursor = UiCursor::NoCursor;
 
@@ -182,12 +181,16 @@ void UiDALIAnalyzer::analyze()
     bool parityError = false;
     bool done = false;
 
-    if (mSyncCursor != UiCursor::NoCursor) {
+    if (mSyncCursor != UiCursor::NoCursor)
+    {
         double t = CursorManager::instance().cursorPosition(mSyncCursor);
-        if (t > 0 && CursorManager::instance().isCursorOn(mSyncCursor)) {
+        if (t > 0 && CursorManager::instance().isCursorOn(mSyncCursor))
+        {
             pos = sampleRate*t;
         }
-        if (pos >= DALIData->size()) {
+
+        if (pos >= DALIData->size())
+        {
             pos = 0;
         }
     }
@@ -196,7 +199,7 @@ void UiDALIAnalyzer::analyze()
 
     int prev = DALIData->at(pos);
 
-    while(!done)
+    while (!done)
     {
         if (pos + numSamplesPerBit >= DALIData->size()) break;
 
@@ -219,13 +222,13 @@ void UiDALIAnalyzer::analyze()
         onesInBit = 0;
         bitStart = pos;
 
-        for(int i = 0; i < numSamplesPerBit; i++)
+        for (int i = 0; i < numSamplesPerBit; i++)
         {
             if (pos > 0 && DALIData->at(pos-1) != DALIData->at(pos))
             {
                 // resyncing if a transition occurs when at least half
                 // the bit time has elapsed
-                if (i >= numSamplesPerBit/2)
+                if (i >= numSamplesPerBit / 2)
                 {
                     break;
                 }
@@ -238,7 +241,7 @@ void UiDALIAnalyzer::analyze()
         }
 
         // value determined by state during at least half the bit time
-        bitValue = (((double)onesInBit / numSamplesPerBit) >= 0.5) ? 1 : 0;
+        bitValue = (((double) onesInBit / numSamplesPerBit) >= 0.5) ? 1 : 0;
 
         switch(state)
         {
@@ -286,55 +289,15 @@ void UiDALIAnalyzer::analyze()
                 onesInValue++;
             }
 
-            if (numDataBits == mDataBits)
+            if (numDataBits == 8)
             {
-#if 0
-                if (mParity != Types::ParityNone)
-                {
-                    state = STATE_PARITY;
-                }
-                else
-#endif
-                {
-                    state = STATE_STOP;
-                }
+                state = STATE_STOP;
             }
             break;
 
         case STATE_PARITY:
 
             parityError = false;
-#if 0
-            switch(mParity) {
-            case Types::ParityNone:
-                break;
-            case Types::ParityOdd:
-                if ( (((onesInValue%2) == 0) && bitValue == 0) ||
-                     (((onesInValue%2) != 0 && bitValue == 1)))
-                {
-                    parityError = true;
-                }
-
-                break;
-            case Types::ParityEven:
-
-                if ( (((onesInValue%2) != 0) && bitValue == 0) ||
-                     (((onesInValue%2) == 0 && bitValue == 1)))
-                {
-                    parityError = true;
-                }
-
-                break;
-            case Types::ParityMark:
-                parityError = (bitValue == 0);
-                break;
-            case Types::ParitySpace:
-                parityError = (bitValue == 1);
-                break;
-            default:
-                break;
-            }
-#endif
             state = STATE_STOP;
 
             break;
@@ -344,14 +307,15 @@ void UiDALIAnalyzer::analyze()
             {
                 numStopBits++;
 
-                if (numStopBits == mStopBits)
+                if (numStopBits == 1)
                 {
-
-                    if (!parityError) {
+                    if (!parityError)
+                    {
                         DALIItem item(DALIItem::TYPE_DATA, value, startIdx, pos);
                         mDALIItems.append(item);
                     }
-                    else {
+                    else
+                    {
                         DALIItem item(DALIItem::TYPE_PARITY_ERROR, 0, startIdx, pos);
                         mDALIItems.append(item);
                     }
@@ -359,17 +323,17 @@ void UiDALIAnalyzer::analyze()
                     state = STATE_START;
                     prev = DALIData->at(pos-1);
 
-                    if (prev == 1) {
+                    if (prev == 1)
+                    {
                         // resync by finding transition
                         findTransition = true;
                     }
-
-
                 }
             }
 
             // no stop bit -> frame error
-            else {
+            else
+            {
                 DALIItem item(DALIItem::TYPE_FRAME_ERROR, 0, startIdx, -1);
                 mDALIItems.append(item);
                 done = true;
@@ -421,7 +385,8 @@ UiDALIAnalyzer* UiDALIAnalyzer::fromSettingsString(const QString &s)
 
     bool ok = false;
 
-    do {
+    do
+    {
         // type;name;Signal;Format;Baud;DataBits;StopBits;Parity;Sync
         QStringList list = s.split(';');
         if (list.size() != 9) break;
@@ -451,7 +416,8 @@ UiDALIAnalyzer* UiDALIAnalyzer::fromSettingsString(const QString &s)
         analyzer->setSignalId(signalId);
         analyzer->setSyncCursor(syncCursor);
 
-    } while (false);
+    }
+    while (false);
 
     return analyzer;
 }
@@ -521,20 +487,21 @@ void UiDALIAnalyzer::paintEvent(QPaintEvent *event)
             // see if the long text version fits
             to = from + longTextWidth+textMargin*2;
 
-            if (i+1 < mDALIItems.size()) {
-
+            if (i+1 < mDALIItems.size())
+            {
                 // get position for the start of the next item
                 double tmp = mTimeAxis->timeToPixelRelativeRef(
                             (double)mDALIItems.at(i+1).startIdx/sampleRate);
 
 
                 // if 'to' overlaps check if short text fits
-                if (to > tmp) {
-
+                if (to > tmp)
+                {
                     to = from + shortTextWidth+textMargin*2;
 
                     // 'to' overlaps next item -> limit to start of next item
-                    if (to > tmp) {
+                    if (to > tmp)
+                    {
                         to = tmp;
                     }
                 }
@@ -552,16 +519,14 @@ void UiDALIAnalyzer::paintEvent(QPaintEvent *event)
             painter.drawLine(to, 0, to-2, -h);
             painter.drawLine(to, 0, to-2, h);
         }
-
-        // drawing a vertical line when the allowed width is too small
         else
         {
-            painter.drawLine(from, -h, from, h);
+            painter.drawLine(from, -h, from, h);       // drawing a vertical line when the allowed width is too small
         }
 
         // only draw the text if it fits between 'from' and 'to'
-        QRectF textRect(from+1, -h, (to-from), 2*h);
-        if (longTextWidth < (to-from))
+        QRectF textRect(from + 1, -h, (to - from), 2 * h);
+        if (longTextWidth < (to - from))
         {
             painter.drawText(textRect, Qt::AlignCenter, longTxt);
         }
@@ -569,9 +534,7 @@ void UiDALIAnalyzer::paintEvent(QPaintEvent *event)
         {
             painter.drawText(textRect, Qt::AlignCenter, shortTxt);
         }
-
     }
-
 }
 
 /*!
@@ -618,7 +581,8 @@ void UiDALIAnalyzer::doLayout()
 int UiDALIAnalyzer::calcMinimumWidth()
 {
     int w = mNameLbl->pos().x() + mNameLbl->minimumSizeHint().width();
-    if (mEditName->isVisible()) {
+    if (mEditName->isVisible())
+    {
         w = mEditName->pos().x() + mEditName->width();
     }
 

@@ -45,15 +45,6 @@ UiDALIAnalyzerConfig::UiDALIAnalyzerConfig(QWidget *parent) :
     mSignalBox = InputHelper::createSignalBox(this, 0);
     formLayout->addRow(tr("DALI Signal: "), mSignalBox);
 
-    mFormatBox = InputHelper::createFormatBox(this, Types::DataFormatHex);
-    formLayout->addRow(tr("Data format: "), mFormatBox);
-
-//    mBaudRate = InputHelper::createDALIBaudRateBox(this, 115200);
-//    formLayout->addRow(tr("Baud Rate: "), mBaudRate);
-
-//    mDataBitsBox = InputHelper::createDALIDataBitsBox(this, 8);
-//    formLayout->addRow(tr("Data bits: "), mDataBitsBox);
-
     mCursorBox = InputHelper::createActiveCursorsBox(this, UiCursor::NoCursor);
     // Deallocation: "Qt Object trees" (See UiMainWindow)
     QLabel* cursorLbl = new QLabel(tr("Synchronize: "), this);
@@ -94,71 +85,6 @@ int UiDALIAnalyzerConfig::signalId()
 void UiDALIAnalyzerConfig::setSignalId(int id)
 {
     InputHelper::setInt(mSignalBox, id);
-}
-
-/*!
-    Set the data format to \a format.
-*/
-void UiDALIAnalyzerConfig::setDataFormat(Types::DataFormat format)
-{
-    InputHelper::setInt(mFormatBox, (int)format);
-}
-
-/*!
-    Returns the data format.
-*/
-Types::DataFormat UiDALIAnalyzerConfig::dataFormat()
-{
-    int f = InputHelper::intValue(mFormatBox);
-    return (Types::DataFormat)f;
-}
-
-/*!
-    Set the baud rate to \a rate.
-*/
-void UiDALIAnalyzerConfig::setBaudRate(int rate)
-{
-    mBaudRate->setText(QString("%1").arg(rate));
-}
-
-/*!
-    Returns the selected baud rate.
-*/
-int UiDALIAnalyzerConfig::baudRate()
-{
-    return mBaudRate->text().toInt();
-}
-
-/*!
-    Set number of stop bits to \a bits.
-*/
-void UiDALIAnalyzerConfig::setStopBits(int bits)
-{
-    InputHelper::setInt(mStopBitsBox, bits);
-}
-
-/*!
-    Returns selected number of stop bits.
-*/
-int UiDALIAnalyzerConfig::stopBits()
-{
-    return InputHelper::intValue(mStopBitsBox);
-}
-
-/*!
-    Set number of data bits to \a bits.
-*/
-void UiDALIAnalyzerConfig::setDataBits(int bits)
-{
-    InputHelper::setInt(mDataBitsBox, bits);
-}
-
-/*!
-    Returns selected number of data bits.
-*/
-int UiDALIAnalyzerConfig::dataBits()
-{
-    return InputHelper::intValue(mDataBitsBox);
 }
 
 /*!
