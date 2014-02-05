@@ -72,7 +72,9 @@ SOURCES += \
     device/labtool/labtoolcalibrationwizardanalogin.cpp \
     device/labtool/labtoolcalibrationdata.cpp \
     device/digitalsignal.cpp \
-    device/reconfigurelistener.cpp
+    device/reconfigurelistener.cpp \
+    analyzer/dali/uiDALIanalyzer.cpp \
+    analyzer/dali/uiDALIanalyzerconfig.cpp
 
 HEADERS += \
     generator/i2cgenerator.h \
@@ -148,7 +150,9 @@ HEADERS += \
     device/labtool/labtoolcalibrationwizardanalogin.h \
     device/labtool/labtoolcalibrationdata.h \
     device/digitalsignal.h \
-    device/reconfigurelistener.h
+    device/reconfigurelistener.h \
+    analyzer/dali/uiDALIanalyzer.h \
+    analyzer/dali/uiDALIanalyzerconfig.h
 
 RESOURCES += \
     icons.qrc
