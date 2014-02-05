@@ -51,6 +51,9 @@
 
     \var UiSimulatorConfigDialog::DigitalFunction UiSimulatorConfigDialog::DigitalFunction_SPI
     SPI signal data
+
+    \var UiSimulatorConfigDialog::DigitalFunction UiSimulatorConfigDialog::DigitalFunction_DALI
+    DALI signal data
 */
 
 /*!
@@ -93,6 +96,7 @@ UiSimulatorConfigDialog::UiSimulatorConfigDialog(QWidget *parent) :
     mDigFuncBox->addItem("I2C", QVariant(UiSimulatorConfigDialog::DigitalFunction_I2C));
     mDigFuncBox->addItem("UART", QVariant(UiSimulatorConfigDialog::DigitalFunction_UART));
     mDigFuncBox->addItem("SPI", QVariant(UiSimulatorConfigDialog::DigitalFunction_SPI));
+    mDigFuncBox->addItem("DALI", QVariant(UiSimulatorConfigDialog::DigitalFunction_DALI));
 
     formLayout->addRow(tr("Digital: "), mDigFuncBox);
 
@@ -322,6 +326,9 @@ void UiSimulatorConfigDialog::handleDigitalFunctionChange(int idx)
         break;
     case UiSimulatorConfigDialog::DigitalFunction_SPI:
         mSpiSettings->show();
+        break;
+    case UiSimulatorConfigDialog::DigitalFunction_DALI:
+        //mDALISettings->show();
         break;
     default:
         break;

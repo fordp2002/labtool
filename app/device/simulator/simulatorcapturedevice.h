@@ -81,6 +81,7 @@ private:
     void generateI2CDigitalSignals();
     void generateUartDigitalSignals();
     void generateSpiDigitalSignals();
+    void generateDALIDigitalSignals();
 
     void generateRandomAnalogSignals();
     void generateSineAnalogSignals();

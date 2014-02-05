@@ -74,7 +74,8 @@ SOURCES += \
     device/digitalsignal.cpp \
     device/reconfigurelistener.cpp \
     analyzer/dali/uiDALIanalyzer.cpp \
-    analyzer/dali/uiDALIanalyzerconfig.cpp
+    analyzer/dali/uiDALIanalyzerconfig.cpp \
+    generator/DALIgenerator.cpp
 
 HEADERS += \
     generator/i2cgenerator.h \
@@ -152,7 +153,8 @@ HEADERS += \
     device/digitalsignal.h \
     device/reconfigurelistener.h \
     analyzer/dali/uiDALIanalyzer.h \
-    analyzer/dali/uiDALIanalyzerconfig.h
+    analyzer/dali/uiDALIanalyzerconfig.h \
+    generator/DALIgenerator.h
 
 RESOURCES += \
     icons.qrc

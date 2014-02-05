@@ -23,6 +23,7 @@
 #include "generator/i2cgenerator.h"
 #include "generator/uartgenerator.h"
 #include "generator/spigenerator.h"
+#include "generator/DALIgenerator.h"
 
 /*!
     \class SimulatorCaptureDevice
@@ -139,6 +140,9 @@ void SimulatorCaptureDevice::start(int sampleRate)
             break;
         case UiSimulatorConfigDialog::DigitalFunction_SPI:
             generateSpiDigitalSignals();
+            break;
+        case UiSimulatorConfigDialog::DigitalFunction_DALI:
+            generateDALIDigitalSignals();
             break;
 
         }
@@ -541,6 +545,56 @@ void SimulatorCaptureDevice::generateSpiDigitalSignals()
     setDigitalSignalData(mConfigDialog->spiMosiSignalId(), mosi);
     setDigitalSignalData(mConfigDialog->spiMisoSignalId(), miso);
     setDigitalSignalData(mConfigDialog->spiEnableSignalId(), cs);
+}
+
+/*!
+    Generate UART digital signal data
+*/
+void SimulatorCaptureDevice::generateDALIDigitalSignals()
+{
+    if (mDigitalSignalList.size() < 1 || mConfigDialog == NULL) return;
+
+    DALIGenerator DALIGen;
+    DALIGen.setBaudRate(2400);
+
+    QByteArray dataToGen = QString("Hello World abcde fghij klmno pqrst uvwxy z0123 45678 9").toLatin1();
+    DALIGen.generate(dataToGen);
+
+    double uartSampleTime = (double)1 / DALIGen.sampleRate();
+    QVector<int> uartData = DALIGen.DALIData();
+
+    if (uartData.size() < 2) return;
+
+    // Deallocation:
+    //    Deleted by deleteSignalData() which is called by destructor or
+    //    clearSignalData()
+    QVector<int> *data = new QVector<int>();
+
+    int maxNumSamples = numberOfSamples();
+    double sampleTime = (double)1/mUsedSampleRate;
+
+    int pos = 0;
+    double nextTime = uartSampleTime;
+
+    for (int i = 0; i < maxNumSamples; i++)
+    {
+        while (i*sampleTime >= nextTime)
+        {
+            pos++;
+            nextTime = (pos+1)*uartSampleTime;
+        }
+
+        if (pos < uartData.size())
+        {
+            data->append(uartData.at(pos));
+        }
+        else
+        {
+            data->append(data->at(i-1));
+        }
+    }
+
+    setDigitalSignalData(mConfigDialog->uartSignalId(), data);
 }
 
 /*!

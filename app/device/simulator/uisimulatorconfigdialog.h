@@ -33,7 +33,8 @@ public:
         DigitalFunction_Random,
         DigitalFunction_I2C,
         DigitalFunction_UART,
-        DigitalFunction_SPI
+        DigitalFunction_SPI,
+        DigitalFunction_DALI
     };
 
     enum AnalogFunction {
