@@ -28,11 +28,9 @@ public:
 
     explicit DALIGenerator(QObject *parent = 0);
 
-    void setBaudRate(int rate);
-    void setDataBits(int numBits);
-    void setStopBits(int numBits);
+    void addIdle(quint32 NumDataBits);
+    void addData(quint32 NumDataBits, quint32 Data);
 
-    bool generate(QByteArray &data);
     QVector<int> DALIData();
     int sampleRate();
     
@@ -42,12 +40,8 @@ public slots:
 
 private:
     int mBaudRate;
-    int mNumDataBits;
-    int mNumStopBits;
 
     QVector<int> mDALIData;
-
-    int addData(char data);
 };
 
 #endif // DALIGENERATOR_H

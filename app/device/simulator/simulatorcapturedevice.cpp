@@ -555,15 +555,15 @@ void SimulatorCaptureDevice::generateDALIDigitalSignals()
     if (mDigitalSignalList.size() < 1 || mConfigDialog == NULL) return;
 
     DALIGenerator DALIGen;
-    DALIGen.setBaudRate(2400);
+    DALIGen.addIdle(4);
+    DALIGen.addData(16, 0x0191);
+    DALIGen.addIdle(8);
+    DALIGen.addData(8, 0xFF);
 
-    QByteArray dataToGen = QString("Hello World abcde fghij klmno pqrst uvwxy z0123 45678 9").toLatin1();
-    DALIGen.generate(dataToGen);
+    double uartSampleTime = (double) 1 / DALIGen.sampleRate();
+    QVector<int> DALIData = DALIGen.DALIData();
 
-    double uartSampleTime = (double)1 / DALIGen.sampleRate();
-    QVector<int> uartData = DALIGen.DALIData();
-
-    if (uartData.size() < 2) return;
+    if (DALIData.size() < 2) return;
 
     // Deallocation:
     //    Deleted by deleteSignalData() which is called by destructor or
@@ -571,7 +571,7 @@ void SimulatorCaptureDevice::generateDALIDigitalSignals()
     QVector<int> *data = new QVector<int>();
 
     int maxNumSamples = numberOfSamples();
-    double sampleTime = (double)1/mUsedSampleRate;
+    double sampleTime = (double) 1 / mUsedSampleRate;
 
     int pos = 0;
     double nextTime = uartSampleTime;
@@ -584,13 +584,13 @@ void SimulatorCaptureDevice::generateDALIDigitalSignals()
             nextTime = (pos+1)*uartSampleTime;
         }
 
-        if (pos < uartData.size())
+        if (pos < DALIData.size())
         {
-            data->append(uartData.at(pos));
+            data->append(DALIData.at(pos));
         }
         else
         {
-            data->append(data->at(i-1));
+            data->append(data->at(i - 1));
         }
     }
 

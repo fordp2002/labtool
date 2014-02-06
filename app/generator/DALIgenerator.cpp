@@ -30,65 +30,7 @@
 DALIGenerator::DALIGenerator(QObject *parent) :
     QObject(parent)
 {
-    mBaudRate = 4800;
-    mNumDataBits = 8;
-    mNumStopBits = 1;
-}
-
-/*!
-    Sets baud rate to \a rate.
-*/
-void DALIGenerator::setBaudRate(int rate)
-{
-    mBaudRate = rate;
-}
-
-/*!
-    Sets number of data bits to \a numBits.
-*/
-void DALIGenerator::setDataBits(int numBits)
-{
-    mNumDataBits = numBits;
-}
-
-/*!
-    Sets number of stop bits to \a numBits.
-*/
-void DALIGenerator::setStopBits(int numBits)
-{
-    mNumStopBits = numBits;
-}
-
-/*!
-    Generate DALI signal using specified \a data.
-*/
-bool DALIGenerator::generate(QByteArray &data)
-{
-    mDALIData.clear();
-
-    // idle line -> high
-    mDALIData.append(1);
-
-    for (int i = 0; i < data.size(); i++)
-    {
-        // start bit
-        mDALIData.append(0);
-
-        // data
-        addData(data.at(i));
-
-        // stop bit(s)
-        for (int j = 0; j < mNumStopBits; j++)
-        {
-            mDALIData.append(1);
-        }
-
-    }
-
-    // idle line -> high
-    mDALIData.append(1);
-
-    return true;
+    mBaudRate = 2400;
 }
 
 /*!
@@ -108,25 +50,43 @@ int DALIGenerator::sampleRate()
     return mBaudRate;
 }
 
+void DALIGenerator::addIdle(quint32 NumDataBits)
+{
+    for (quint32 i = 0; i < NumDataBits; i++)
+    {
+        mDALIData.append(1);
+    }
+}
+
 /*!
     Add data.
 */
-int DALIGenerator::addData(char data)
+void DALIGenerator::addData(quint32 NumDataBits, quint32 Data)
 {
-    int numOnes = 0;
-    // LSB first (do we also need to support MSB first)
-    for (int i = 0; i < mNumDataBits; i++)
+    mDALIData.append(0);                                            // Start Bit
+
+    if (NumDataBits && (NumDataBits <= 32))
     {
-        if ((data & (1<<i)) != 0)
+        Data <<= (32 - NumDataBits);                                // Shift bits to the top of the word
+
+        // LSB first (do we also need to support MSB first)
+        for (quint32 i = 0; i < NumDataBits; i++)
         {
-            mDALIData.append(1);
-            numOnes++;
-        }
-        else
-        {
-            mDALIData.append(0);
+            if (Data & 0x80000000ULL)
+            {
+                mDALIData.append(1);
+                mDALIData.append(0);
+            }
+            else
+            {
+                mDALIData.append(0);
+                mDALIData.append(1);
+            }
+
+            Data <<= 1;
         }
     }
 
-    return numOnes;
+    mDALIData.append(1);                                    // Idle Bits
+    mDALIData.append(1);
 }
