@@ -105,11 +105,14 @@ private:
         SignalIdMarginRight = 10
     };
 
-    enum DALIState {
+    enum DALIState
+    {
+        STATE_IDLE,
         STATE_START,
-        STATE_DATA,
-        STATE_PARITY,
-        STATE_STOP
+        STATE_DATA_FIRST,
+        STATE_DATA_SECOND,
+        STATE_STOP,
+        STATE_ERROR
     };
 
     static int DALIAnalyzerCounter;

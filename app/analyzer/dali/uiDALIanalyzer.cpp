@@ -170,175 +170,165 @@ void UiDALIAnalyzer::analyze()
     int numDataBits = 0;
     int numStopBits = 0;
     int pos = 0;
-    int onesInBit = 0;
+
     int onesInValue = 0;
     int bitValue = 0;
     int bitStart = 0;
 
-
     bool startFound = false;
     bool findTransition = true;
-    bool parityError = false;
     bool done = false;
+    int Level = 0;
+    int BitLength = 0;
+    int Position = 0;
+    int TotalSize = DALIData->size();
+    int FirstBit = 0;
 
-    if (mSyncCursor != UiCursor::NoCursor)
+    DALIState state = STATE_IDLE;
+
+    while (1)
     {
-        double t = CursorManager::instance().cursorPosition(mSyncCursor);
-        if (t > 0 && CursorManager::instance().isCursorOn(mSyncCursor))
+        Level = DALIData->at(Position);
+
+        while (1)
         {
-            pos = sampleRate*t;
-        }
-
-        if (pos >= DALIData->size())
-        {
-            pos = 0;
-        }
-    }
-
-    DALIState state = STATE_START;
-
-    int prev = DALIData->at(pos);
-
-    while (!done)
-    {
-        if (pos + numSamplesPerBit >= DALIData->size()) break;
-
-        if (findTransition)
-        {
-            if (DALIData->at(pos) != prev)
+            if (Position >= TotalSize)
             {
-               findTransition = false;
+                return;
             }
-            else
-            {
-                prev = DALIData->at(pos);
-                pos++;
 
-                continue;
+            if (Level != DALIData->at(Position++))
+            {
+               break;
             }
+
+            BitLength++;
         }
 
-        // check value of the bit
-        onesInBit = 0;
-        bitStart = pos;
-
-        for (int i = 0; i < numSamplesPerBit; i++)
+        switch (state)
         {
-            if (pos > 0 && DALIData->at(pos-1) != DALIData->at(pos))
+        case STATE_ILDE:
             {
-                // resyncing if a transition occurs when at least half
-                // the bit time has elapsed
-                if (i >= numSamplesPerBit / 2)
+                if (Level == 1)
                 {
-                    break;
+                    if (BitLength >= (numSamplesPerBit * 3))
+                    {
+                        state = STATE_START;
+                    }
                 }
             }
+            break;
 
-            if (DALIData->at(pos++) == 1)
-            {
-                onesInBit++;
-            }
-        }
-
-        // value determined by state during at least half the bit time
-        bitValue = (((double) onesInBit / numSamplesPerBit) >= 0.5) ? 1 : 0;
-
-        switch(state)
-        {
         case STATE_START:
-            if (bitValue == 0)
             {
-                startFound = true;
-                startIdx = bitStart;
-                numDataBits = 0;
-                numStopBits = 0;
-                onesInValue = 0;
-                value = 0;
-                parityError = false;
-
-                state = STATE_DATA;
-            }
-
-            // it was not a start bit
-            else
-            {
-                // restart if the start bit has never been seen
-                if (!startFound)
+                if ((Level == 0) && ((BitLength * 2) > numSamplesPerBit) && ((BitLength * 2) < 3))
                 {
-                    findTransition = true;
+                    state = STATE_DATA;
                 }
-
-                // frame error if start bit has been seen at least once
                 else
                 {
-                    DALIItem item(DALIItem::TYPE_FRAME_ERROR, 0, bitStart, -1);
-                    mDALIItems.append(item);
-                    done = true;
+
+                }
+            }
+            break;
+
+        case STATE_DATA_FIRST:
+            {
+                if (((BitLength * 2) > numSamplesPerBit) && ((BitLength * 2) < (numSamplesPerBit * 3))
+                {
+                    FirstBit = Level;
+                    state = STATE_DATA_SECOND;
+                }
+                else
+                {
+                    state = STATE_ERROR;
                 }
 
+                if (Level)
+                {
+                    value |= 1;
+                }
+
+                numDataBits++;
             }
             break;
 
-        case STATE_DATA:
-            // TODO: also support MSB first
-            value |= (bitValue << numDataBits);
-            numDataBits++;
-
-            if (bitValue == 1)
+        case STATE_DATA_SECOND:
             {
-                onesInValue++;
+                if ((BitLength * 2) <= numSamplesPerBit)
+                {
+                    state = STATE_ERROR;
+                    break;
+                }
+
+                if (BitLength >= (numSamplesPerBit * 3))
+                {
+
+
+                }
+
+
+
+                else if ((BitLength * 2) < (numSamplesPerBit * 3))
+                {
+
+                }
+
+
+                        if (((BitLength * 2) > numSamplesPerBit) && ((BitLength * 2) < 3))
+
+
+            value <<= 1;
+                    if (Level)
+
             }
-
-            if (numDataBits == 8)
-            {
-                state = STATE_STOP;
-            }
-            break;
-
-        case STATE_PARITY:
-
-            parityError = false;
-            state = STATE_STOP;
-
             break;
 
         case STATE_STOP:
-            if (bitValue == 1)
             {
-                numStopBits++;
-
-                if (numStopBits == 1)
+                if (bitValue == 1)
                 {
-                    if (!parityError)
-                    {
-                        DALIItem item(DALIItem::TYPE_DATA, value, startIdx, pos);
-                        mDALIItems.append(item);
-                    }
-                    else
-                    {
-                        DALIItem item(DALIItem::TYPE_PARITY_ERROR, 0, startIdx, pos);
-                        mDALIItems.append(item);
-                    }
+                    numStopBits++;
 
-                    state = STATE_START;
-                    prev = DALIData->at(pos-1);
-
-                    if (prev == 1)
+                    if (numStopBits == 1)
                     {
-                        // resync by finding transition
-                        findTransition = true;
+                        if (!parityError)
+                        {
+                            DALIItem item(DALIItem::TYPE_DATA, value, startIdx, pos);
+                            mDALIItems.append(item);
+                        }
+                        else
+                        {
+                            DALIItem item(DALIItem::TYPE_PARITY_ERROR, 0, startIdx, pos);
+                            mDALIItems.append(item);
+                        }
+
+                        state = STATE_START;
+                        prev = DALIData->at(pos-1);
+
+                        if (prev == 1)
+                        {
+                            // resync by finding transition
+                            findTransition = true;
+                        }
                     }
                 }
-            }
 
-            // no stop bit -> frame error
-            else
-            {
-                DALIItem item(DALIItem::TYPE_FRAME_ERROR, 0, startIdx, -1);
-                mDALIItems.append(item);
-                done = true;
+                // no stop bit -> frame error
+                else
+                {
+                    done = true;
+                }
             }
             break;
+        }
+
+        if (State == Error)
+        {
+            DALIItem item(DALIItem::TYPE_FRAME_ERROR, 0, startIdx, -1);
+            mDALIItems.append(item);
+
+            State = STATE_ERROR;
         }
     }
 }
