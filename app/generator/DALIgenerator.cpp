@@ -50,6 +50,9 @@ int DALIGenerator::sampleRate()
     return mBaudRate;
 }
 
+/*!
+    Add idle.
+*/
 void DALIGenerator::addIdle(quint32 NumDataBits)
 {
     for (quint32 i = 0; i < NumDataBits; i++)
@@ -63,30 +66,32 @@ void DALIGenerator::addIdle(quint32 NumDataBits)
 */
 void DALIGenerator::addData(quint32 NumDataBits, quint32 Data)
 {
-    mDALIData.append(0);                                            // Start Bit
+    mDALIData.append(0);
+    mDALIData.append(1);                                            // Start Bit
 
     if (NumDataBits && (NumDataBits <= 32))
     {
         Data <<= (32 - NumDataBits);                                // Shift bits to the top of the word
 
-        // LSB first (do we also need to support MSB first)
         for (quint32 i = 0; i < NumDataBits; i++)
         {
             if (Data & 0x80000000ULL)
             {
-                mDALIData.append(1);
                 mDALIData.append(0);
+                mDALIData.append(1);
             }
             else
             {
-                mDALIData.append(0);
                 mDALIData.append(1);
+                mDALIData.append(0);
             }
 
             Data <<= 1;
         }
     }
 
-    mDALIData.append(1);                                    // Idle Bits
     mDALIData.append(1);
+    mDALIData.append(1);
+    mDALIData.append(1);
+    mDALIData.append(1);                                            // Idle Bits
 }

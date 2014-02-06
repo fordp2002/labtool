@@ -165,19 +165,10 @@ void UiDALIAnalyzer::analyze()
     // if there aren't enough samples per bit the decoding isn't reliable
     if (numSamplesPerBit < 3) return;
 
+    int FirstPos = 0;
     int startIdx = 0;
     int value = 0;
     int numDataBits = 0;
-    int numStopBits = 0;
-    int pos = 0;
-
-    int onesInValue = 0;
-    int bitValue = 0;
-    int bitStart = 0;
-
-    bool startFound = false;
-    bool findTransition = true;
-    bool done = false;
     int Level = 0;
     int BitLength = 0;
     int Position = 0;
@@ -186,17 +177,14 @@ void UiDALIAnalyzer::analyze()
 
     DALIState state = STATE_IDLE;
 
-    while (1)
+    do
     {
-        Level = DALIData->at(Position);
+        FirstPos = Position;
+        Level = DALIData->at(Position++);
+        BitLength = 1;
 
-        while (1)
+        while (Position < TotalSize)
         {
-            if (Position >= TotalSize)
-            {
-                return;
-            }
-
             if (Level != DALIData->at(Position++))
             {
                break;
@@ -207,130 +195,133 @@ void UiDALIAnalyzer::analyze()
 
         switch (state)
         {
-        case STATE_ILDE:
+        case STATE_IDLE:
             {
                 if (Level == 1)
                 {
                     if (BitLength >= (numSamplesPerBit * 3))
                     {
-                        state = STATE_START;
+                        state = STATE_START_FIRST;
+                        startIdx = Position;
                     }
                 }
             }
             break;
 
-        case STATE_START:
+        case STATE_START_FIRST:
             {
-                if ((Level == 0) && ((BitLength * 2) > numSamplesPerBit) && ((BitLength * 2) < 3))
+                if ((Level == 0) && ((BitLength * 2) > numSamplesPerBit) && ((BitLength * 2) < (numSamplesPerBit * 3)))
                 {
-                    state = STATE_DATA;
+                    state = STATE_START_SECOND;
+                    value = 0;
+                    numDataBits = 0;
                 }
                 else
                 {
+                    state = STATE_IDLE;
+                }
+            }
+            break;
 
+        case STATE_START_SECOND:
+            {
+                if ((Level == 1) && ((BitLength * 2) > numSamplesPerBit) && (BitLength < (numSamplesPerBit * 3)))
+                {
+                    value = 0;
+                    numDataBits = 0;
+                    if ((BitLength * 2) < (numSamplesPerBit * 3))
+                    {
+                        state = STATE_DATA_FIRST;
+                    }
+                    else
+                    {
+                        FirstBit = Level;
+                        state = STATE_DATA_SECOND;
+                    }
+                }
+                else
+                {
+                    state = STATE_IDLE;
                 }
             }
             break;
 
         case STATE_DATA_FIRST:
             {
-                if (((BitLength * 2) > numSamplesPerBit) && ((BitLength * 2) < (numSamplesPerBit * 3))
+                if (((BitLength * 2) > numSamplesPerBit) && ((BitLength * 2) < (numSamplesPerBit * 3)))
                 {
                     FirstBit = Level;
                     state = STATE_DATA_SECOND;
                 }
                 else
                 {
-                    state = STATE_ERROR;
+                    state = STATE_ERROR;                               // Too Short or Too Long
                 }
-
-                if (Level)
-                {
-                    value |= 1;
-                }
-
-                numDataBits++;
             }
             break;
 
         case STATE_DATA_SECOND:
             {
-                if ((BitLength * 2) <= numSamplesPerBit)
+                if (((BitLength * 2) <= numSamplesPerBit) || (FirstBit == Level))
                 {
-                    state = STATE_ERROR;
+                    state = STATE_ERROR;                                // Too Short
                     break;
+                }
+
+                value <<= 1;
+                numDataBits++;
+
+                if (Level == 1)
+                {
+                    value |= 1;
                 }
 
                 if (BitLength >= (numSamplesPerBit * 3))
                 {
-
-
+                    state = STATE_STOP;
+                    break;
                 }
 
-
-
-                else if ((BitLength * 2) < (numSamplesPerBit * 3))
+                if ((BitLength * 2) < (numSamplesPerBit * 3))
                 {
-
+                    state = STATE_DATA_FIRST;
                 }
-
-
-                        if (((BitLength * 2) > numSamplesPerBit) && ((BitLength * 2) < 3))
-
-
-            value <<= 1;
-                    if (Level)
-
-            }
-            break;
-
-        case STATE_STOP:
-            {
-                if (bitValue == 1)
-                {
-                    numStopBits++;
-
-                    if (numStopBits == 1)
-                    {
-                        if (!parityError)
-                        {
-                            DALIItem item(DALIItem::TYPE_DATA, value, startIdx, pos);
-                            mDALIItems.append(item);
-                        }
-                        else
-                        {
-                            DALIItem item(DALIItem::TYPE_PARITY_ERROR, 0, startIdx, pos);
-                            mDALIItems.append(item);
-                        }
-
-                        state = STATE_START;
-                        prev = DALIData->at(pos-1);
-
-                        if (prev == 1)
-                        {
-                            // resync by finding transition
-                            findTransition = true;
-                        }
-                    }
-                }
-
-                // no stop bit -> frame error
                 else
                 {
-                    done = true;
+                    FirstBit = Level;
+                    state = STATE_DATA_SECOND;
                 }
             }
             break;
+
+        default:
+           {
+           }
+           break;
         }
 
-        if (State == Error)
+        if (state == STATE_ERROR)
         {
-            DALIItem item(DALIItem::TYPE_FRAME_ERROR, 0, startIdx, -1);
+            DALIItem item(DALIItem::TYPE_FRAME_ERROR, 0, startIdx, Position);
             mDALIItems.append(item);
 
-            State = STATE_ERROR;
+            state = STATE_IDLE;
+        }
+        else if (state == STATE_STOP)
+        {
+            int End = FirstPos + (numSamplesPerBit * 4);
+            if (End >= TotalSize)
+            {
+                End =  TotalSize - 1;
+            }
+
+            DALIItem item(DALIItem::TYPE_DATA, value, startIdx, End);
+            mDALIItems.append(item);
+
+            state = STATE_IDLE;
         }
     }
+    while (Position < TotalSize);
 }
 
 /*!

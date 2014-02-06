@@ -108,7 +108,8 @@ private:
     enum DALIState
     {
         STATE_IDLE,
-        STATE_START,
+        STATE_START_FIRST,
+        STATE_START_SECOND,
         STATE_DATA_FIRST,
         STATE_DATA_SECOND,
         STATE_STOP,
