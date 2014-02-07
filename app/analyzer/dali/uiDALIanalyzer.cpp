@@ -248,15 +248,20 @@ void UiDALIAnalyzer::analyze()
 
         case STATE_DATA_FIRST:
             {
-                if (((BitLength * 2) > numSamplesPerBit) && ((BitLength * 2) < (numSamplesPerBit * 3)))
+                if ((BitLength * 2) <= numSamplesPerBit)
                 {
-                    FirstBit = Level;
-                    state = STATE_DATA_SECOND;
+                    state = STATE_ERROR;                                // Too Short
+                    break;
                 }
-                else
+
+                if (BitLength >= (numSamplesPerBit * 3))
                 {
-                    state = STATE_ERROR;                               // Too Short or Too Long
+                    state = STATE_STOP;
+                    break;
                 }
+
+                FirstBit = Level;
+                state = STATE_DATA_SECOND;
             }
             break;
 
@@ -268,9 +273,8 @@ void UiDALIAnalyzer::analyze()
                     break;
                 }
 
-                value <<= 1;
                 numDataBits++;
-
+                value <<= 1;
                 if (Level == 1)
                 {
                     value |= 1;
@@ -318,7 +322,9 @@ void UiDALIAnalyzer::analyze()
             DALIItem item(DALIItem::TYPE_DATA, value, startIdx, End);
             mDALIItems.append(item);
 
-            state = STATE_IDLE;
+//          state = STATE_IDLE;
+            state = STATE_START_FIRST;
+            startIdx = Position;
         }
     }
     while (Position < TotalSize);
