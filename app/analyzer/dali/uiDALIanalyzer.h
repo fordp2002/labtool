@@ -37,7 +37,8 @@ public:
     /*!
         DALI item type
     */
-    enum ItemType {
+    enum ItemType
+    {
         TYPE_DATA,
         TYPE_FRAME_ERROR,
         TYPE_PARITY_ERROR
@@ -45,26 +46,25 @@ public:
 
     // default constructor needed in order to add this to QVector
     /*! Default constructor */
-    DALIItem() {
+    DALIItem()
+    {
     }
 
     /*! Constructs a new container */
-    DALIItem(ItemType type, int value, int startIdx, int stopIdx) {
-        this->type = type;
-        this->value = value;
-        this->startIdx = startIdx;
-        this->stopIdx = stopIdx;
+    DALIItem(ItemType type, int value, int numDataBits, int startIdx, int stopIdx)
+    {
+        this->type          = type;
+        this->value         = value;
+        this->numDataBits   = numDataBits;
+        this->startIdx      = startIdx;
+        this->stopIdx       = stopIdx;
     }
 
-    /*! type */
-    ItemType type;
-    /*! value */
-    int value;
-    /*! item start index */
-    int startIdx;
-    /*! item stop index */
-    int stopIdx;    
-
+    ItemType type;              /*! type */
+    int value;                  /*! value */
+    int numDataBits;            /*! numDataBits */
+    int startIdx;               /*! item start index */
+    int stopIdx;                /*! item stop index */
 };
 
 class UiDALIAnalyzer : public UiAnalyzer
@@ -132,6 +132,7 @@ private:
 
     void typeAndValueAsString(DALIItem::ItemType type,
                                  int value,
+                                 int numDataBits,
                                  QString &shortTxt,
                                  QString &longTxt);
     

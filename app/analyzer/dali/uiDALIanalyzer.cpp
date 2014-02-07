@@ -306,7 +306,7 @@ void UiDALIAnalyzer::analyze()
 
         if (state == STATE_ERROR)
         {
-            DALIItem item(DALIItem::TYPE_FRAME_ERROR, 0, startIdx, Position);
+            DALIItem item(DALIItem::TYPE_FRAME_ERROR, 0, 0, startIdx, Position);
             mDALIItems.append(item);
 
             state = STATE_IDLE;
@@ -319,7 +319,7 @@ void UiDALIAnalyzer::analyze()
                 End =  TotalSize - 1;
             }
 
-            DALIItem item(DALIItem::TYPE_DATA, value, startIdx, End);
+            DALIItem item(DALIItem::TYPE_DATA, value, numDataBits, startIdx, End);
             mDALIItems.append(item);
 
 //          state = STATE_IDLE;
@@ -454,7 +454,7 @@ void UiDALIAnalyzer::paintEvent(QPaintEvent *event)
         toIdx = item.stopIdx;
 
 
-        typeAndValueAsString(item.type, item.value, shortTxt, longTxt);
+        typeAndValueAsString(item.type, item.value, item.numDataBits, shortTxt, longTxt);
 
         int shortTextWidth = painter.fontMetrics().width(shortTxt);
         int longTextWidth = painter.fontMetrics().width(longTxt);
@@ -585,15 +585,38 @@ int UiDALIAnalyzer::calcMinimumWidth()
 */
 void UiDALIAnalyzer::typeAndValueAsString(DALIItem::ItemType type,
                                           int value,
+                                          int numDataBits,
                                           QString &shortTxt,
                                           QString &longTxt)
 {
     switch (type)
     {
     case DALIItem::TYPE_DATA:
-        shortTxt = formatValue(Types::DataFormatHex, value);
-        longTxt = formatValue(Types::DataFormatHex, value);
+        {
+            int Len = 2;
+
+            if (numDataBits > 8)
+            {
+                if (numDataBits <= 16)
+                {
+                   Len = 4;
+                }
+                else if (numDataBits <= 24)
+                {
+                    Len = 6;
+                }
+                else
+                {
+                    Len = 8;
+                }
+            }
+
+            QLatin1Char fillChar('0');
+            shortTxt    = QString("%1").arg(value, Len, 16, fillChar).toUpper();
+            longTxt     = QString("%1").arg(value, Len, 16, fillChar).toUpper();
+        }
         break;
+
     case DALIItem::TYPE_PARITY_ERROR:
         shortTxt = "PE";
         longTxt = "Parity Error";
