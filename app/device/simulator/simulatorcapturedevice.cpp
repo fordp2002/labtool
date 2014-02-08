@@ -154,10 +154,10 @@ void SimulatorCaptureDevice::start(int sampleRate)
         case UiSimulatorConfigDialog::AnalogFunction_Sine:
             generateSineAnalogSignals();
             break;
-
+        case UiSimulatorConfigDialog::AnalogFunction_DALI:
+            generateDALIAnalogSignals();
+            break;
         }
-
-
     }
 
 #if 0
@@ -548,10 +548,63 @@ void SimulatorCaptureDevice::generateSpiDigitalSignals()
 }
 
 /*!
-    Generate UART digital signal data
+    Generate DALI digital signal data
 */
 void SimulatorCaptureDevice::generateDALIDigitalSignals()
 {
+    if (mDigitalSignalList.size() < 1 || mConfigDialog == NULL) return;
+
+    DALIGenerator DALIGen;
+    DALIGen.addIdle(4);
+    DALIGen.addData(16, 0x0191);
+    DALIGen.addIdle(8);
+    DALIGen.addData(8, 0xFF);
+
+    QVector<int> DALIData = DALIGen.DALIData();
+
+    if (DALIData.size() < 2) return;
+
+    // Deallocation:
+    //    Deleted by deleteSignalData() which is called by destructor or
+    //    clearSignalData()
+    QVector<int> *data = new QVector<int>();
+
+    double DALISampleTime   = ((double) 1) / DALIGen.sampleRate();
+    double sampleTime       = ((double) 1)/ mUsedSampleRate;
+    double nextTime         = 0;
+
+    int maxNumSamples       = numberOfSamples();
+    int pos                 = 0;
+    int Value               = 1;
+
+    for (int i = 0; i < maxNumSamples; i++)
+    {
+        if ((i * sampleTime) >= nextTime)
+        {
+            if (pos < DALIData.size())
+            {
+                Value = DALIData.at(pos++);
+                nextTime = pos * DALISampleTime;
+            }
+            else
+            {
+                Value = 1;
+                nextTime = maxNumSamples;
+            }
+        }
+
+        data->append(Value);
+    }
+
+    setDigitalSignalData(mConfigDialog->uartSignalId(), data);
+}
+
+/*!
+    Generate DALI analog signal data
+*/
+void SimulatorCaptureDevice::generateDALIAnalogSignals()
+{
+#if 0
     if (mDigitalSignalList.size() < 1 || mConfigDialog == NULL) return;
 
     DALIGenerator DALIGen;
@@ -595,6 +648,40 @@ void SimulatorCaptureDevice::generateDALIDigitalSignals()
     }
 
     setDigitalSignalData(mConfigDialog->uartSignalId(), data);
+
+
+    foreach (AnalogSignal* signal, mAnalogSignalList)
+    {
+        int id = signal->id();
+        if (id >= MaxAnalogSignals) continue;
+
+        int maxNumSamples = numberOfSamples();
+
+        // Deallocation:
+        //    Deleted by deleteSignalData() which is called by destructor or
+        //    clearSignalData()
+        QVector<double> *s = new QVector<double>();
+
+        for (int j = 0; j < maxNumSamples; ++j)
+        {
+            int Logic = 1;
+            if (j < DALIData.size())
+            {
+                Logic = DALIData.at(j);
+
+                double val = (Logic) ? 4.0 : 0.0;
+
+                while (j < maxNumSamples)
+                {
+                    s->append(val);
+                    j++;
+                }
+            }
+         }
+
+        mAnalogSignals[id] = s;
+    }
+#endif
 }
 
 /*!

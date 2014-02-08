@@ -83,6 +83,7 @@ private:
     void generateSpiDigitalSignals();
     void generateDALIDigitalSignals();
 
+    void generateDALIAnalogSignals();
     void generateRandomAnalogSignals();
     void generateSineAnalogSignals();
     void deleteSignalData();

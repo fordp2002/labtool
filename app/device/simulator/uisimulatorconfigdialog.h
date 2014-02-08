@@ -39,7 +39,8 @@ public:
 
     enum AnalogFunction {
         AnalogFunction_Random,
-        AnalogFunction_Sine
+        AnalogFunction_Sine,
+        AnalogFunction_DALI
     };
 
 

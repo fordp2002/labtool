@@ -67,6 +67,9 @@
 
     \var UiSimulatorConfigDialog::AnalogFunction UiSimulatorConfigDialog::AnalogFunction_Sine
     Signal data with sine waveform
+
+    \var UiSimulatorConfigDialog::AnalogFunction UiSimulatorConfigDialog::AnalogFunction_DALI
+    Signal data with sine waveform
 */
 
 
@@ -108,6 +111,7 @@ UiSimulatorConfigDialog::UiSimulatorConfigDialog(QWidget *parent) :
 
     mAnFuncBox->addItem("Random", QVariant(UiSimulatorConfigDialog::AnalogFunction_Random));
     mAnFuncBox->addItem("Sine", QVariant(UiSimulatorConfigDialog::AnalogFunction_Sine));
+    mAnFuncBox->addItem("DALI", QVariant(UiSimulatorConfigDialog::AnalogFunction_DALI));
 
     formLayout->addRow(tr("Analog: "), mAnFuncBox);
 
