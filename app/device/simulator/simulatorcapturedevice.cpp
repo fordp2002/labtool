@@ -569,22 +569,21 @@ void SimulatorCaptureDevice::generateDALIDigitalSignals()
     //    clearSignalData()
     QVector<int> *data = new QVector<int>();
 
-    double DALISampleTime   = ((double) 1) / DALIGen.sampleRate();
-    double sampleTime       = ((double) 1)/ mUsedSampleRate;
-    double nextTime         = 0;
+    double DALISampleSteps   = ((double) mUsedSampleRate) / DALIGen.sampleRate();
 
+    int nextTime            = 0;
     int maxNumSamples       = numberOfSamples();
     int pos                 = 0;
     int Value               = 1;
 
     for (int i = 0; i < maxNumSamples; i++)
     {
-        if ((i * sampleTime) >= nextTime)
+        if (i >= nextTime)
         {
             if (pos < DALIData.size())
             {
                 Value = DALIData.at(pos++);
-                nextTime = pos * DALISampleTime;
+                nextTime = (((double) pos) * DALISampleSteps) + 0.5L;
             }
             else
             {
