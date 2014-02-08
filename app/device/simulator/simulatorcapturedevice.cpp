@@ -430,7 +430,6 @@ void SimulatorCaptureDevice::generateI2CDigitalSignals()
 */
 void SimulatorCaptureDevice::generateUartDigitalSignals()
 {
-
     if (mDigitalSignalList.size() < 1 || mConfigDialog == NULL) return;
 
     UartGenerator uartGen;
@@ -663,7 +662,6 @@ void SimulatorCaptureDevice::generateDALIDigitalSignals()
 */
 void SimulatorCaptureDevice::generateDALIAnalogSignals()
 {
-#if 0
     if (mDigitalSignalList.size() < 1 || mConfigDialog == NULL) return;
 
     DALIGenerator DALIGen;
@@ -672,75 +670,15 @@ void SimulatorCaptureDevice::generateDALIAnalogSignals()
     DALIGen.addIdle(8);
     DALIGen.addData(8, 0xFF);
 
-    double uartSampleTime = (double) 1 / DALIGen.sampleRate();
-    QVector<int> DALIData = DALIGen.DALIData();
+    QVector<int> DALIData   = DALIGen.DALIData();
+    double DALISampleSteps  = ((double) mUsedSampleRate) / DALIGen.sampleRate();
 
-    if (DALIData.size() < 2) return;
+    QVector<double>* data = AddAnalogData(DALISampleSteps, DALIData, 4.0L, 0.0L);
 
-    // Deallocation:
-    //    Deleted by deleteSignalData() which is called by destructor or
-    //    clearSignalData()
-    QVector<int> *data = new QVector<int>();
-
-    int maxNumSamples = numberOfSamples();
-    double sampleTime = (double) 1 / mUsedSampleRate;
-
-    int pos = 0;
-    double nextTime = uartSampleTime;
-
-    for (int i = 0; i < maxNumSamples; i++)
+    if (data)
     {
-        while (i*sampleTime >= nextTime)
-        {
-            pos++;
-            nextTime = (pos+1)*uartSampleTime;
-        }
-
-        if (pos < DALIData.size())
-        {
-            data->append(DALIData.at(pos));
-        }
-        else
-        {
-            data->append(data->at(i - 1));
-        }
+        mAnalogSignals[mConfigDialog->DALISignalId()] = data;
     }
-
-    setDigitalSignalData(mConfigDialog->uartSignalId(), data);
-
-
-    foreach (AnalogSignal* signal, mAnalogSignalList)
-    {
-        int id = signal->id();
-        if (id >= MaxAnalogSignals) continue;
-
-        int maxNumSamples = numberOfSamples();
-
-        // Deallocation:
-        //    Deleted by deleteSignalData() which is called by destructor or
-        //    clearSignalData()
-        QVector<double> *s = new QVector<double>();
-
-        for (int j = 0; j < maxNumSamples; ++j)
-        {
-            int Logic = 1;
-            if (j < DALIData.size())
-            {
-                Logic = DALIData.at(j);
-
-                double val = (Logic) ? 4.0 : 0.0;
-
-                while (j < maxNumSamples)
-                {
-                    s->append(val);
-                    j++;
-                }
-            }
-         }
-
-        mAnalogSignals[id] = s;
-    }
-#endif
 }
 
 /*!
