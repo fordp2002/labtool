@@ -75,6 +75,8 @@ private:
 
     int mTriggerIdx;
 
+    QVector<int>*       AddDigitalData  (double WaveSteps, QVector<int>& WaveData);
+    QVector<double>*    AddAnalogData   (double WaveSteps, QVector<int>& WaveData, double HighValue, double LowValue);
 
     int numberOfSamples();
     void generateRandomDigitalSignals();

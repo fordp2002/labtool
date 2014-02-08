@@ -547,6 +547,93 @@ void SimulatorCaptureDevice::generateSpiDigitalSignals()
     setDigitalSignalData(mConfigDialog->spiEnableSignalId(), cs);
 }
 
+QVector<int>* SimulatorCaptureDevice::AddDigitalData(double WaveSteps, QVector<int>& WaveData)
+// Deallocation:
+//    Deleted by deleteSignalData() which is called by destructor or
+//    clearSignalData()
+{
+    QVector<int>* data  = NULL;
+    int WaveSize        = WaveData.size();
+
+    if (WaveSize >= 2)
+    {
+        int nextTime            = 0;
+        int maxNumSamples       = numberOfSamples();
+        int pos                 = 0;
+        int Value               = 0;
+
+        // Deallocation:
+        //    Deleted by deleteSignalData() which is called by destructor or
+        //    clearSignalData()
+        data = new QVector<int>();
+
+        for (int i = 0; i < maxNumSamples; i++)
+        {
+            if (i >= nextTime)
+            {
+                if (pos < WaveSize)
+                {
+                    Value = WaveData.at(pos++);
+                    nextTime = (((double) pos) * WaveSteps) + 0.5L;
+                }
+                else
+                {
+                    Value = 1;
+                    nextTime = maxNumSamples;
+                }
+            }
+
+            data->append(Value);
+        }
+    }
+
+    return data;
+}
+
+QVector<double>* SimulatorCaptureDevice::AddAnalogData(double WaveSteps, QVector<int>& WaveData, double HighValue, double LowValue)
+// Deallocation:
+//    Deleted by deleteSignalData() which is called by destructor or
+//    clearSignalData()
+{
+    QVector<double>* data = NULL;
+    int WaveSize            = WaveData.size();
+
+    if (WaveSize >= 2)
+    {
+        int nextTime            = 0;
+        int maxNumSamples       = numberOfSamples();
+        int pos                 = 0;
+
+        double Value            = 0.0L;
+
+        // Deallocation:
+        //    Deleted by deleteSignalData() which is called by destructor or
+        //    clearSignalData()
+        data = new QVector<double>();
+
+        for (int i = 0; i < maxNumSamples; i++)
+        {
+            if (i >= nextTime)
+            {
+                if (pos < WaveSize)
+                {
+                    Value = WaveData.at(pos++) ? HighValue : LowValue;
+                    nextTime = (((double) pos) * WaveSteps) + 0.5L;
+                }
+                else
+                {
+                    Value = 1;
+                    nextTime = maxNumSamples;
+                }
+            }
+
+            data->append(Value);
+        }
+    }
+
+    return data;
+}
+
 /*!
     Generate DALI digital signal data
 */
@@ -560,43 +647,16 @@ void SimulatorCaptureDevice::generateDALIDigitalSignals()
     DALIGen.addIdle(8);
     DALIGen.addData(8, 0xFF);
 
-    QVector<int> DALIData = DALIGen.DALIData();
+    QVector<int> DALIData   = DALIGen.DALIData();
+    double DALISampleSteps  = ((double) mUsedSampleRate) / DALIGen.sampleRate();
 
-    if (DALIData.size() < 2) return;
+    QVector<int>* data = AddDigitalData(DALISampleSteps, DALIData);
 
-    // Deallocation:
-    //    Deleted by deleteSignalData() which is called by destructor or
-    //    clearSignalData()
-    QVector<int> *data = new QVector<int>();
-
-    double DALISampleSteps   = ((double) mUsedSampleRate) / DALIGen.sampleRate();
-
-    int nextTime            = 0;
-    int maxNumSamples       = numberOfSamples();
-    int pos                 = 0;
-    int Value               = 1;
-
-    for (int i = 0; i < maxNumSamples; i++)
+    if (data)
     {
-        if (i >= nextTime)
-        {
-            if (pos < DALIData.size())
-            {
-                Value = DALIData.at(pos++);
-                nextTime = (((double) pos) * DALISampleSteps) + 0.5L;
-            }
-            else
-            {
-                Value = 1;
-                nextTime = maxNumSamples;
-            }
-        }
-
-        data->append(Value);
+        setDigitalSignalData(mConfigDialog->DALISignalId(), data);
     }
-
-    setDigitalSignalData(mConfigDialog->uartSignalId(), data);
-}
+ }
 
 /*!
     Generate DALI analog signal data

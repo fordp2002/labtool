@@ -69,6 +69,8 @@ public:
     Types::SpiEnable spiEnableMode();
     int spiDataBits();
 
+    int DALISignalId();
+
 signals:
     
 public slots:
@@ -107,10 +109,14 @@ private:
     QComboBox* mSpiEnableModeBox;
     QComboBox* mSpiDataBitsBox;
 
+    QWidget* mDALISettings;
+
+    QComboBox* mDALISignalBox;
+
     QWidget* createUartSettings();
     QWidget* createI2cSettings();
     QWidget* createSpiSettings();
-    
+    QWidget* createDALISettings();
 };
 
 #endif // UISIMULATORCONFIGDIALOG_H

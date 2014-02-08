@@ -145,6 +145,9 @@ UiSimulatorConfigDialog::UiSimulatorConfigDialog(QWidget *parent) :
     mSpiSettings = createSpiSettings();
     verticalLayout->addWidget(mSpiSettings);
 
+    // --- DALI settings
+    mDALISettings = createDALISettings();
+    verticalLayout->addWidget(mDALISettings);
 
     verticalLayout->addWidget(bottonBox);
 
@@ -313,6 +316,14 @@ int UiSimulatorConfigDialog::spiDataBits()
 }
 
 /*!
+    Returns signal ID to use for the DALI signal.
+*/
+int UiSimulatorConfigDialog::DALISignalId()
+{
+    return InputHelper::intValue(mDALISignalBox);
+}
+
+/*!
     Handles a change of digital function.
 */
 void UiSimulatorConfigDialog::handleDigitalFunctionChange(int idx)
@@ -332,7 +343,7 @@ void UiSimulatorConfigDialog::handleDigitalFunctionChange(int idx)
         mSpiSettings->show();
         break;
     case UiSimulatorConfigDialog::DigitalFunction_DALI:
-        //mDALISettings->show();
+        mDALISettings->show();
         break;
     default:
         break;
@@ -451,6 +462,24 @@ QWidget* UiSimulatorConfigDialog::createSpiSettings()
     return w;
 }
 
+/*!
+    Create widget with UART signal settings.
+*/
+QWidget* UiSimulatorConfigDialog::createDALISettings()
+{
+    // Deallocation: "Qt Object trees" (See UiMainWindow)
+    QFrame* w = new QFrame(this);
+    w->setFrameShape(QFrame::StyledPanel);
 
+    // Deallocation:
+    //   w->setlayout takes ownership of formLayout-
+    QFormLayout* formLayout = new QFormLayout;
 
+    mDALISignalBox = InputHelper::createSignalBox(this, 0);
+    formLayout->addRow(tr("DALI Signal: "), mDALISignalBox);
 
+    w->hide();
+    w->setLayout(formLayout);
+
+    return w;
+}
