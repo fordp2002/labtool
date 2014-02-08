@@ -430,6 +430,7 @@ void SimulatorCaptureDevice::generateI2CDigitalSignals()
 */
 void SimulatorCaptureDevice::generateUartDigitalSignals()
 {
+
     if (mDigitalSignalList.size() < 1 || mConfigDialog == NULL) return;
 
     UartGenerator uartGen;

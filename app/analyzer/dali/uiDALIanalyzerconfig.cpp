@@ -42,7 +42,7 @@ UiDALIAnalyzerConfig::UiDALIAnalyzerConfig(QWidget *parent) :
     // Deallocation: Re-parented when calling verticalLayout->addLayout
     QFormLayout* formLayout = new QFormLayout;
 
-    mSignalBox = InputHelper::createSignalBox(this, 0);
+    mSignalBox = InputHelper::createSignalBox(this, 0, InputHelper::BothSignals);
     formLayout->addRow(tr("DALI Signal: "), mSignalBox);
 
     mCursorBox = InputHelper::createActiveCursorsBox(this, UiCursor::NoCursor);

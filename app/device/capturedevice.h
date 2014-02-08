@@ -74,6 +74,7 @@ public:
     AnalogSignal* addAnalogSignal(int id);
     void removeAnalogSignal(AnalogSignal* s);
     QList<int> unusedAnalogIds();
+    QString analogSignalName(int id);
     QList<AnalogSignal*> analogSignals() {return mAnalogSignalList;}
 
     virtual QVector<double>* analogData(int signalId) = 0;

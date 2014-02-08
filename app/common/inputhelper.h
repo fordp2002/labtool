@@ -26,12 +26,19 @@ class InputHelper
 {
 public:
 
+    enum SignalType
+    {
+        NoSignals        = 0,
+        AnalogSignals    = 1,
+        DigitalSignals   = 2,
+        BothSignals      = 3
+    };
 
     static int intValue(QComboBox* box);
     static int intValue(QLineEdit* box);
     static void setInt(QComboBox* box, int value);
 
-    static QComboBox* createSignalBox(QWidget* parent, int selected);
+    static QComboBox* createSignalBox(QWidget* parent, int selected, SignalType Type = DigitalSignals);
     static QComboBox* createActiveCursorsBox(QWidget* parent, int selected);
     static QComboBox* createFormatBox(QWidget* parent, Types::DataFormat selectedFormat);
 

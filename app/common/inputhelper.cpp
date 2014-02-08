@@ -38,21 +38,40 @@ InputHelper::InputHelper()
 /*!
     Create an input box for selecting digital signals.
 */
-QComboBox* InputHelper::createSignalBox(QWidget* parent, int selected)
+QComboBox* InputHelper::createSignalBox(QWidget* parent, int selected, SignalType Type)
 {
     // Deallocation: "Qt Object trees" (See UiMainWindow)
     QComboBox* box = new QComboBox(parent);
 
     CaptureDevice* device = DeviceManager::instance().activeDevice()->captureDevice();
 
-    if (device != NULL) {
+    if (device != NULL)
+    {
+        if ((Type == AnalogSignals) || (Type == BothSignals))
+        {
+            for (int i = 0; i < device->maxNumAnalogSignals(); i++)
+            {
+                QString name = device->analogSignalName(i);
 
-        for (int i = 0; i < device->maxNumDigitalSignals(); i++) {
-            QString name = device->digitalSignalName(i);
+                box->addItem(QString("A%1 - %2").arg(i).arg(name), QVariant(i));
+                if (i == selected)
+                {
+                    box->setCurrentIndex(i);
+                }
+            }
+       }
 
-            box->addItem(QString("D%1 - %2").arg(i).arg(name), QVariant(i));
-            if (i == selected) {
-                box->setCurrentIndex(i);
+        if ((Type == DigitalSignals) || (Type == BothSignals))
+        {
+            for (int i = 0; i < device->maxNumDigitalSignals(); i++)
+            {
+                QString name = device->digitalSignalName(i);
+
+                box->addItem(QString("D%1 - %2").arg(i).arg(name), QVariant(i));
+                if (i == selected)
+                {
+                    box->setCurrentIndex(i);
+                }
             }
         }
     }

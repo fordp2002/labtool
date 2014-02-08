@@ -293,7 +293,7 @@ QList<int> CaptureDevice::unusedDigitalIds()
 */
 QString CaptureDevice::digitalSignalName(int id)
 {
-    QString name = QString("Digital %1").arg(id);;
+    QString name = QString("Digital %1").arg(id);
 
     foreach(DigitalSignal* s, mDigitalSignalList) {
         if (s->id() == id) {
@@ -415,6 +415,26 @@ QList<int> CaptureDevice::unusedAnalogIds()
     }
 
     return l;
+}
+
+/*!
+    Returns the readable name associated with a specific digital signal
+    identified with \a id.
+*/
+QString CaptureDevice::analogSignalName(int id)
+{
+    QString name = QString("Analog %1").arg(id);
+
+    foreach(AnalogSignal* s, mAnalogSignalList)
+    {
+        if (s->id() == id)
+        {
+            name = s->name();
+            break;
+        }
+    }
+
+    return name;
 }
 
 /*!
