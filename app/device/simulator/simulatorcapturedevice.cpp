@@ -622,7 +622,6 @@ QVector<double>* SimulatorCaptureDevice::AddAnalogData(double WaveSteps, QVector
                 }
                 else
                 {
-                    Value = 1;
                     nextTime = maxNumSamples;
                 }
             }
@@ -663,7 +662,7 @@ void SimulatorCaptureDevice::generateDALIDigitalSignals()
 */
 void SimulatorCaptureDevice::generateDALIAnalogSignals()
 {
-    if (mDigitalSignalList.size() < 1 || mConfigDialog == NULL) return;
+    if (mAnalogSignalList.size() < 1 || mConfigDialog == NULL) return;
 
     DALIGenerator DALIGen;
     DALIGen.addIdle(4);
@@ -678,7 +677,13 @@ void SimulatorCaptureDevice::generateDALIAnalogSignals()
 
     if (data)
     {
-        mAnalogSignals[mConfigDialog->DALISignalId()] = data;
+        int id = mConfigDialog->DALISignalId();
+        if (mAnalogSignals[id] != NULL)
+        {
+            delete mAnalogSignals[id];
+        }
+
+        mAnalogSignals[id] = data;
     }
 }
 

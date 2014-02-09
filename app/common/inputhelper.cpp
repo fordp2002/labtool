@@ -53,7 +53,7 @@ QComboBox* InputHelper::createSignalBox(QWidget* parent, int selected, SignalTyp
             {
                 QString name = device->analogSignalName(i);
 
-                box->addItem(QString("A%1 - %2").arg(i).arg(name), QVariant(i));
+                box->addItem(QString("A%1 - %2").arg(i).arg(name), QVariant(i + ANALOG_BASE));
                 if (i == selected)
                 {
                     box->setCurrentIndex(i);

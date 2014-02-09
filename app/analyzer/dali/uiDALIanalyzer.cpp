@@ -13,6 +13,7 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
+#include "common/inputhelper.h"
 #include "uiDALIanalyzer.h"
 
 #include <QDebug>
@@ -75,7 +76,14 @@ UiDALIAnalyzer::UiDALIAnalyzer(QWidget *parent) :
 void UiDALIAnalyzer::setSignalId(int signalId)
 {
     mSignalId = signalId;
-    mSignalLbl->setText(QString("Signal: D%1").arg(signalId));
+    if (signalId < ANALOG_BASE)
+    {
+        mSignalLbl->setText(QString("Signal: D%1").arg(signalId));
+    }
+    else
+    {
+        mSignalLbl->setText(QString("Signal: A%1").arg(signalId - ANALOG_BASE));
+    }
 }
 
 
@@ -151,15 +159,30 @@ void UiDALIAnalyzer::setSignalId(int signalId)
 */
 void UiDALIAnalyzer::analyze()
 {
+    QVector<int>*       DigitalDALIData = NULL;
+    QVector<double>*    AnalogDALIData  = NULL;
+    int TotalSize                       = 0;
+
     mDALIItems.clear();
 
     if (mSignalId == -1) return;
 
     CaptureDevice* device = DeviceManager::instance().activeDevice()->captureDevice();
     int sampleRate = device->usedSampleRate();
-    QVector<int>* DALIData = device->digitalData(mSignalId);
 
-    if (DALIData == NULL || DALIData->size() == 0) return;
+    if (mSignalId < ANALOG_BASE)
+    {
+        DigitalDALIData = device->digitalData(mSignalId);
+        if (DigitalDALIData == NULL || DigitalDALIData->size() == 0) return;
+        TotalSize = DigitalDALIData->size();
+    }
+    else
+    {
+        AnalogDALIData = device->analogData(mSignalId - ANALOG_BASE);
+        if (AnalogDALIData == NULL || AnalogDALIData->size() == 0) return;
+        TotalSize = AnalogDALIData->size();
+    }
+
 
     int numSamplesPerBit = sampleRate / mBaudRate;
     // if there aren't enough samples per bit the decoding isn't reliable
@@ -172,7 +195,6 @@ void UiDALIAnalyzer::analyze()
     int Level = 0;
     int BitLength = 0;
     int Position = 0;
-    int TotalSize = DALIData->size();
     int FirstBit = 0;
 
     DALIState state = STATE_IDLE;
@@ -180,12 +202,35 @@ void UiDALIAnalyzer::analyze()
     do
     {
         FirstPos = Position;
-        Level = DALIData->at(Position++);
         BitLength = 1;
+
+        if (mSignalId < ANALOG_BASE)
+        {
+            Level = DigitalDALIData->at(Position);
+        }
+        else
+        {
+            Level = (AnalogDALIData->at(Position) >= 2.0L) ? 1 : 0;
+        }
+
+        Position++;
 
         while (Position < TotalSize)
         {
-            if (Level != DALIData->at(Position++))
+            int NewLevel;
+
+            if (mSignalId < ANALOG_BASE)
+            {
+                NewLevel = DigitalDALIData->at(Position);
+            }
+            else
+            {
+                NewLevel = (AnalogDALIData->at(Position) >= 2.0L) ? 1 : 0;
+            }
+
+            Position++;
+
+            if (Level != NewLevel)
             {
                break;
             }

@@ -22,10 +22,11 @@
 
 #include "common/types.h"
 
+#define ANALOG_BASE 0x100
+
 class InputHelper
 {
 public:
-
     enum SignalType
     {
         NoSignals        = 0,
