@@ -25,6 +25,8 @@
 #include "generator/spigenerator.h"
 #include "generator/DALIgenerator.h"
 
+#include "analyzer/dali/uiDALIanalyzer.h"
+
 /*!
     \class SimulatorCaptureDevice
     \brief Allows the user to test the Capture functionality of this application.
@@ -107,6 +109,19 @@ QList<double> SimulatorCaptureDevice::supportedVPerDiv()
 
     return mSupportedVPerDiv;
 }
+
+QList<double> SimulatorCaptureDevice::supportrdProbeMult()
+{
+    if (mSupportedVPerDiv.size() == 0)
+    {
+        mSupportedVPerDiv.append(1);
+        mSupportedVPerDiv.append(10);
+        mSupportedVPerDiv.append(100);
+    }
+
+    return mSupportedVPerDiv;
+}
+
 
 void SimulatorCaptureDevice::configureBeforeStart(QWidget* parent)
 {
@@ -673,7 +688,7 @@ void SimulatorCaptureDevice::generateDALIAnalogSignals()
     QVector<int> DALIData   = DALIGen.DALIData();
     double DALISampleSteps  = ((double) mUsedSampleRate) / DALIGen.sampleRate();
 
-    QVector<double>* data = AddAnalogData(DALISampleSteps, DALIData, 4.0L, 0.0L);
+    QVector<double>* data = AddAnalogData(DALISampleSteps, DALIData, DALI_HIGH, DALI_LOW);
 
     if (data)
     {

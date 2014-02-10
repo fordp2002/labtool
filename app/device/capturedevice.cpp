@@ -94,6 +94,11 @@ QList<double> CaptureDevice::supportedVPerDiv()
     return QList<double>();
 }
 
+QList<double> CaptureDevice::supportrdProbeMult()
+{
+    return QList<double>();
+}
+
 /*!
     \fn virtual bool CaptureDevice::supportsContinuousCapture()
 

@@ -342,6 +342,18 @@ QList<double> LabToolCaptureDevice::supportedVPerDiv()
     return mSupportedVPerDiv;
 }
 
+QList<double> LabToolCaptureDevice::supportrdProbeMult()
+{
+    if (mSupportedProbeMult.size() == 0)
+    {
+        mSupportedProbeMult.append(1);
+        mSupportedProbeMult.append(10);
+        mSupportedProbeMult.append(100);
+    }
+
+    return mSupportedProbeMult;
+}
+
 /*!
     Opens the \ref UiLabToolTriggerConfig dialog to allow configuration
     of the additional trigger settings supported by the LabTool Hardware.

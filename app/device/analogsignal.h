@@ -54,8 +54,7 @@ public:
         WaveformNum // must be last
     };
 
-    explicit AnalogSignal();
-    explicit AnalogSignal(AnalogUsage usage, int id = 0);
+    explicit AnalogSignal(AnalogUsage usage = AnalogUsageCapture, int id = 0);
     bool operator==(const AnalogSignal &other);
     bool operator!=(const AnalogSignal &other) {return !(*this == other);}
     AnalogSignal& operator=(const AnalogSignal &other);
@@ -74,7 +73,9 @@ public:
     void setCoupling(AnalogCoupling c);
 
     double vPerDiv() const {return mVPerDiv;}
+    double vProbeMult() const { return mProbeMult;}
     void setVPerDiv(double v);
+    void setProbeMult(double m);
 
     double triggerLevel() const {return mTriggerLevel;}
     void setTriggerLevel(double l);
@@ -109,6 +110,7 @@ private:
     AnalogTriggerState mTriggerState;
     AnalogCoupling mCoupling;
     double mVPerDiv;
+    double mProbeMult;
     double mTriggerLevel;
 
     // ##### Generator properties #####

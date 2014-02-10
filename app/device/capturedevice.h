@@ -37,6 +37,7 @@ public:
     virtual int maxNumDigitalSignals() = 0;
     virtual int maxNumAnalogSignals() = 0;
     virtual QList<double> supportedVPerDiv();
+    virtual QList<double> supportrdProbeMult();
     virtual bool supportsContinuousCapture() {return false;}
 
     virtual void configureBeforeStart(QWidget* parent) {(void)parent;/* do nothing by default */}

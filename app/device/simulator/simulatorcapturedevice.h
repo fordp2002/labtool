@@ -32,6 +32,7 @@ public:
     int maxNumDigitalSignals();
     int maxNumAnalogSignals();
     QList<double> supportedVPerDiv();
+    QList<double> supportrdProbeMult();
 
     void configureBeforeStart(QWidget* parent);
     void start(int sampleRate);

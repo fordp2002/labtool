@@ -22,6 +22,11 @@
 #include "capture/uicursor.h"
 #include "common/types.h"
 
+#define DALI_LOW       2.0L
+#define DALI_THRESHOLD 8.0L
+#define DALI_HIGH      16.0L
+
+
 /*!
     \class DALIItem
     \brief Container class for DALI items.

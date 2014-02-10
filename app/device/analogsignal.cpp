@@ -91,28 +91,6 @@
     Generate a triangle waveform.
 */
 
-
-/*!
-    Constructs an empty analog signal with default usage and ID.
-*/
-AnalogSignal::AnalogSignal()
-{
-//    AnalogSignal::AnalogSignal(AnalogUsageCapture, 0);
-    mUsage     = AnalogUsageCapture;
-    mReconfigureListener = NULL;
-    mId        = 0;
-    mName      = QString("Analog %1").arg(0);
-
-    mTriggerState = AnalogTriggerNone;
-    mCoupling     = CouplingDc;
-    mVPerDiv      = 2;
-    mTriggerLevel = 0;
-
-    mFrequency = 10000;
-    mWaveform  = AnalogSignal::WaveformSine;
-    mAmplitude = 3;
-}
-
 /*!
     Constructs a new AnalogSignal with ID set to \a id.
     The \a usage parameter indicates where this container class will be
@@ -130,6 +108,7 @@ AnalogSignal::AnalogSignal(AnalogUsage usage, int id)
     mTriggerState = AnalogTriggerNone;
     mCoupling     = CouplingDc;
     mVPerDiv      = 2;
+    mProbeMult    = 1.0L;
     mTriggerLevel = 0;
 
     mFrequency = 10000;
@@ -148,6 +127,7 @@ bool AnalogSignal::operator==(const AnalogSignal &other)
             mTriggerState == other.mTriggerState &&
             mCoupling == other.mCoupling &&
             mVPerDiv == other.mVPerDiv &&
+            mProbeMult == other.mProbeMult &&
             mTriggerLevel == other.mTriggerLevel &&
             mFrequency == other.mFrequency &&
             mWaveform == other.mWaveform &&
@@ -174,6 +154,7 @@ AnalogSignal& AnalogSignal::operator=(const AnalogSignal &other)
     mTriggerState = other.mTriggerState;
     mCoupling = other.mCoupling;
     mVPerDiv = other.mVPerDiv;
+    mProbeMult = other.mProbeMult;
     mTriggerLevel = other.mTriggerLevel;
     mFrequency = other.mFrequency;
     mWaveform = other.mWaveform;
@@ -275,6 +256,24 @@ void AnalogSignal::setVPerDiv(double v)
 }
 
 /*!
+    \fn void AnalogSignal::setVPerDiv(double v)
+
+   Sets the Volts/Div for this signal to \a v.
+*/
+void AnalogSignal::setProbeMult(double m)
+{
+    if (m != mProbeMult)
+    {
+        mProbeMult = m;
+
+        if (mReconfigureListener != NULL)
+        {
+            mReconfigureListener->reconfigure();
+        }
+    }
+}
+
+/*!
     \fn double AnalogSignal::triggerLevel() const
 
    Returns the trigger level for this signal.
@@ -362,6 +361,7 @@ QString AnalogSignal::toSettingsString()
         str.append(QString("%1;").arg(mTriggerState));
         str.append(QString("%1;").arg(mTriggerLevel));
         str.append(QString("%1").arg(mCoupling));
+        str.append(QString("%1").arg(mProbeMult));
     }
     else {
         str.append(QString("%1;").arg(mWaveform));
@@ -448,11 +448,22 @@ AnalogSignal AnalogSignal::fromSettingsString(QString& s)
             AnalogSignal::AnalogCoupling coupling
                     = (AnalogSignal::AnalogCoupling)c;
 
+            double ProbeMult = 1.0L;
+
+#if 0
+            double ProbeMult = list.at(8).toDouble(&ok);
+
+            if (!ok)                                            // Not in the first version so may not be there!
+            {
+               ProbeMult = 1.0L;
+            }
+#endif
 
             tmp.mUsage = usage;
             tmp.mId = id;
             tmp.mName = name;
             tmp.mVPerDiv = vperdiv;
+            tmp.mProbeMult = ProbeMult;
             tmp.mTriggerState = trigger;
             tmp.mTriggerLevel = level;
             tmp.mCoupling = coupling;

@@ -68,6 +68,9 @@ public:
     QPushButton* mDisableBtn;
     /*! Spinbox used for volts per division */
     UiListSpinBox* mVPerDivBox;
+    /*! Spinbox used for Probe Volts */
+    UiListSpinBox* mVVoltMultBox;
+
     /*! Widget used for the analog trigger */
     UiAnalogTrigger* mAnalogTrigger;
 
@@ -106,6 +109,7 @@ UiAnalogSignalPrivate::UiAnalogSignalPrivate()
     mEditName   = NULL;
     mDisableBtn = NULL;
     mVPerDivBox = NULL;
+    mVVoltMultBox  = NULL;
     mAnalogTrigger = NULL;
     mDcBtn         = NULL;
     mAcBtn         = NULL;
@@ -133,6 +137,9 @@ UiAnalogSignalPrivate::~UiAnalogSignalPrivate()
 
     mVPerDivBox->close();
     delete mVPerDivBox;
+
+    mVVoltMultBox->close();
+    delete mVVoltMultBox;
 
     mAnalogTrigger->close();
     delete mAnalogTrigger;
@@ -194,6 +201,18 @@ void UiAnalogSignalPrivate::setup(AnalogSignal* signal, UiAnalogSignal* parent)
     parent->connect(mVPerDivBox, SIGNAL(valueChanged(double)),
                     parent, SLOT(changeVPerDiv(double)));
     mVPerDivBox->show();
+
+    // Deallocation: Destructor
+    mVVoltMultBox = new UiListSpinBox(parent);
+    mVVoltMultBox->setPrefix("x ");
+    QList<double> vVoltMult = device->supportrdProbeMult();
+
+    mVVoltMultBox->setSupportedValues(vVoltMult);
+    mVVoltMultBox->setValue(signal->vProbeMult());
+
+    parent->connect(mVVoltMultBox, SIGNAL(valueChanged(double)),
+                    parent, SLOT(changeVPerDiv(double)));
+    mVVoltMultBox->show();
 
     // Deallocation: Destructor
     mAnalogTrigger = new UiAnalogTrigger(parent);
@@ -300,9 +319,14 @@ void UiAnalogSignalPrivate::setGeometry(int x, int y, int w, int h)
     wx = w/2-mVPerDivBox->width()/2;
     mVPerDivBox->move(wx, wy);
 
-    // signal color is painted below mVPerDivBox (see paintInfo)
+    // VoltMultBox
     wy = mVPerDivBox->pos().y()+mVPerDivBox->height()+3+5+5;
 
+    wx = (w / 2) - (mVVoltMultBox->width() / 2);
+    mVVoltMultBox->move(wx, wy);
+
+    // signal color is painted below mVPerDivBox (see paintInfo)
+    wy = mVVoltMultBox->pos().y()+ mVVoltMultBox->height() + 3 + 5 + 5;
     mDcBtn->move(w/2-mDcBtn->width(), wy);
     mAcBtn->move(w/2, wy);
 
@@ -370,6 +394,9 @@ int UiAnalogSignalPrivate::minimumWidth()
 
     int w2 = mIdLbl->pos().x()+mIdLbl->width()+mVPerDivBox->width();
     if (w2 > w) w = w2;
+
+    int w3 = mIdLbl->pos().x() + mIdLbl->width() + mVVoltMultBox->width();
+    if (w3 > w) w = w3;
 
     w += 15;
     w += mAnalogTrigger->width();

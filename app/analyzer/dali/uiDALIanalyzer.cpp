@@ -210,7 +210,7 @@ void UiDALIAnalyzer::analyze()
         }
         else
         {
-            Level = (AnalogDALIData->at(Position) >= 2.0L) ? 1 : 0;
+            Level = (AnalogDALIData->at(Position) >= DALI_THRESHOLD) ? 1 : 0;
         }
 
         Position++;
@@ -225,7 +225,7 @@ void UiDALIAnalyzer::analyze()
             }
             else
             {
-                NewLevel = (AnalogDALIData->at(Position) >= 2.0L) ? 1 : 0;
+                NewLevel = (AnalogDALIData->at(Position) >= DALI_THRESHOLD) ? 1 : 0;
             }
 
             Position++;
