@@ -66,6 +66,7 @@ private slots:
 
     void disableSignal();
     void changeVPerDiv(double v);
+    void changeProbeMult(double v);
     void changeTriggers();
     void handleTriggerLevelChanged();
     void handleCouplingChanged(QAbstractButton* btn);

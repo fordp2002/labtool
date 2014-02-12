@@ -34,7 +34,6 @@ public:
     int maxNumDigitalSignals();
     int maxNumAnalogSignals();
     QList<double> supportedVPerDiv();
-    QList<double> supportrdProbeMult();
     bool supportsContinuousCapture() {return true;}
 
     void configureTrigger(QWidget* parent);
@@ -96,7 +95,6 @@ private:
     QList<int>* mDigitalSignalTransitions[MaxDigitalSignals];
 
     QList<double> mSupportedVPerDiv;
-    QList<double> mSupportedProbeMult;
 
     QTimer* mReconfigTimer;
 

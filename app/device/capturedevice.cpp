@@ -96,7 +96,14 @@ QList<double> CaptureDevice::supportedVPerDiv()
 
 QList<double> CaptureDevice::supportrdProbeMult()
 {
-    return QList<double>();
+    if (mSupportedProbeMult.size() == 0)
+    {
+        mSupportedProbeMult.append(1);
+        mSupportedProbeMult.append(10);
+        mSupportedProbeMult.append(100);
+    }
+
+    return mSupportedProbeMult;
 }
 
 /*!
@@ -440,6 +447,23 @@ QString CaptureDevice::analogSignalName(int id)
     }
 
     return name;
+}
+
+/*!
+    Returns the readable name associated with a specific digital signal
+    identified with \a id.
+*/
+AnalogSignal* CaptureDevice::GetAnalogSignal(int id)
+{
+    foreach(AnalogSignal* s, mAnalogSignalList)
+    {
+        if (s->id() == id)
+        {
+            return s;
+        }
+    }
+
+    return NULL;
 }
 
 /*!

@@ -76,6 +76,7 @@ public:
     void removeAnalogSignal(AnalogSignal* s);
     QList<int> unusedAnalogIds();
     QString analogSignalName(int id);
+    AnalogSignal* GetAnalogSignal(int id);
     QList<AnalogSignal*> analogSignals() {return mAnalogSignalList;}
 
     virtual QVector<double>* analogData(int signalId) = 0;
@@ -88,7 +89,6 @@ public:
 
     virtual void digitalTransitions(int signalId, QList<int> &list);
 
-
 signals:
     void captureFinished(bool successful, QString msg);
     
@@ -97,11 +97,10 @@ public slots:
 
 protected:
     int mUsedSampleRate;
+
     QList<DigitalSignal*> mDigitalSignalList;
     QList<AnalogSignal*> mAnalogSignalList;
-
-
-    
+    QList<double> mSupportedProbeMult;
 };
 
 #endif // CAPTUREDEVICE_H

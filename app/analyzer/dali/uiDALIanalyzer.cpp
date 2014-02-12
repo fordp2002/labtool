@@ -162,6 +162,7 @@ void UiDALIAnalyzer::analyze()
     QVector<int>*       DigitalDALIData = NULL;
     QVector<double>*    AnalogDALIData  = NULL;
     int TotalSize                       = 0;
+    double ProbeMult                    = 1.0L;
 
     mDALIItems.clear();
 
@@ -181,6 +182,11 @@ void UiDALIAnalyzer::analyze()
         AnalogDALIData = device->analogData(mSignalId - ANALOG_BASE);
         if (AnalogDALIData == NULL || AnalogDALIData->size() == 0) return;
         TotalSize = AnalogDALIData->size();
+        AnalogSignal* pAnalogSignal = device->GetAnalogSignal(mSignalId - ANALOG_BASE);
+        if (pAnalogSignal)
+        {
+            ProbeMult = pAnalogSignal->vProbeMult();
+        }
     }
 
 
@@ -210,7 +216,7 @@ void UiDALIAnalyzer::analyze()
         }
         else
         {
-            Level = (AnalogDALIData->at(Position) >= DALI_THRESHOLD) ? 1 : 0;
+            Level = ((AnalogDALIData->at(Position) * ProbeMult) >= DALI_THRESHOLD) ? 1 : 0;
         }
 
         Position++;
@@ -225,7 +231,7 @@ void UiDALIAnalyzer::analyze()
             }
             else
             {
-                NewLevel = (AnalogDALIData->at(Position) >= DALI_THRESHOLD) ? 1 : 0;
+                NewLevel = ((AnalogDALIData->at(Position) * ProbeMult) >= DALI_THRESHOLD) ? 1 : 0;
             }
 
             Position++;

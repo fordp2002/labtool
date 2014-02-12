@@ -69,7 +69,7 @@ public:
     /*! Spinbox used for volts per division */
     UiListSpinBox* mVPerDivBox;
     /*! Spinbox used for Probe Volts */
-    UiListSpinBox* mVVoltMultBox;
+    UiListSpinBox* mProbeMultBox;
 
     /*! Widget used for the analog trigger */
     UiAnalogTrigger* mAnalogTrigger;
@@ -109,7 +109,7 @@ UiAnalogSignalPrivate::UiAnalogSignalPrivate()
     mEditName   = NULL;
     mDisableBtn = NULL;
     mVPerDivBox = NULL;
-    mVVoltMultBox  = NULL;
+    mProbeMultBox  = NULL;
     mAnalogTrigger = NULL;
     mDcBtn         = NULL;
     mAcBtn         = NULL;
@@ -138,8 +138,8 @@ UiAnalogSignalPrivate::~UiAnalogSignalPrivate()
     mVPerDivBox->close();
     delete mVPerDivBox;
 
-    mVVoltMultBox->close();
-    delete mVVoltMultBox;
+    mProbeMultBox->close();
+    delete mProbeMultBox;
 
     mAnalogTrigger->close();
     delete mAnalogTrigger;
@@ -203,16 +203,16 @@ void UiAnalogSignalPrivate::setup(AnalogSignal* signal, UiAnalogSignal* parent)
     mVPerDivBox->show();
 
     // Deallocation: Destructor
-    mVVoltMultBox = new UiListSpinBox(parent);
-    mVVoltMultBox->setPrefix("x ");
+    mProbeMultBox = new UiListSpinBox(parent);
+    mProbeMultBox->setPrefix("x ");
     QList<double> vVoltMult = device->supportrdProbeMult();
 
-    mVVoltMultBox->setSupportedValues(vVoltMult);
-    mVVoltMultBox->setValue(signal->vProbeMult());
+    mProbeMultBox->setSupportedValues(vVoltMult);
+    mProbeMultBox->setValue(signal->vProbeMult());
 
-    parent->connect(mVVoltMultBox, SIGNAL(valueChanged(double)),
-                    parent, SLOT(changeVPerDiv(double)));
-    mVVoltMultBox->show();
+    parent->connect(mProbeMultBox, SIGNAL(valueChanged(double)),
+                    parent, SLOT(changeProbeMult(double)));
+    mProbeMultBox->show();
 
     // Deallocation: Destructor
     mAnalogTrigger = new UiAnalogTrigger(parent);
@@ -322,11 +322,11 @@ void UiAnalogSignalPrivate::setGeometry(int x, int y, int w, int h)
     // VoltMultBox
     wy = mVPerDivBox->pos().y()+mVPerDivBox->height()+3+5+5;
 
-    wx = (w / 2) - (mVVoltMultBox->width() / 2);
-    mVVoltMultBox->move(wx, wy);
+    wx = (w / 2) - (mProbeMultBox->width() / 2);
+    mProbeMultBox->move(wx, wy);
 
     // signal color is painted below mVPerDivBox (see paintInfo)
-    wy = mVVoltMultBox->pos().y()+ mVVoltMultBox->height() + 3 + 5 + 5;
+    wy = mProbeMultBox->pos().y()+ mProbeMultBox->height() + 3 + 5 + 5;
     mDcBtn->move(w/2-mDcBtn->width(), wy);
     mAcBtn->move(w/2, wy);
 
@@ -395,7 +395,7 @@ int UiAnalogSignalPrivate::minimumWidth()
     int w2 = mIdLbl->pos().x()+mIdLbl->width()+mVPerDivBox->width();
     if (w2 > w) w = w2;
 
-    int w3 = mIdLbl->pos().x() + mIdLbl->width() + mVVoltMultBox->width();
+    int w3 = mIdLbl->pos().x() + mIdLbl->width() + mProbeMultBox->width();
     if (w3 > w) w = w3;
 
     w += 15;
@@ -730,7 +730,27 @@ void UiAnalogSignal::changeVPerDiv(double v)
             break;
         }
     }
+}
 
+void UiAnalogSignal::changeProbeMult(double v)
+{
+    QObject* o = QObject::sender();
+
+    for (int i = 0; i < mSignals.size(); i++)
+    {
+        UiAnalogSignalPrivate* p = mSignals.at(i);
+
+        if (p->mProbeMultBox == o)
+        {
+            p->mSignal->setProbeMult(v);
+            //p->mAnalogTrigger->setProbeMult(v);
+
+            doLayout();
+            update();
+
+            break;
+        }
+    }
 }
 
 /*!
@@ -1029,8 +1049,9 @@ void UiAnalogSignal::paintSignalValue(QPainter* painter, double time)
             double yPx = (mNumPxPerDiv/p->mSignal->vPerDiv())
                     *(-intersect[i].y()) + p->mGndPos;
 
+            double ProbeMult = p->mSignal->vProbeMult();
             QString voltageLevel =
-                    QString::number(intersect[i].y(), 'f', 2) + " V";
+                    QString::number(intersect[i].y() * ProbeMult, 'f', 2) + " V";
 
             QPen pen = painter->pen();
             pen.setColor(Configuration::instance().textColor());

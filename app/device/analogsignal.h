@@ -73,9 +73,13 @@ public:
     void setCoupling(AnalogCoupling c);
 
     double vPerDiv() const {return mVPerDiv;}
-    double vProbeMult() const { return mProbeMult;}
+
     void setVPerDiv(double v);
     void setProbeMult(double m);
+    double vProbeMult()
+    {
+       return mProbeMult;
+    }
 
     double triggerLevel() const {return mTriggerLevel;}
     void setTriggerLevel(double l);

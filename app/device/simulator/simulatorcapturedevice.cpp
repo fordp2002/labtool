@@ -110,19 +110,6 @@ QList<double> SimulatorCaptureDevice::supportedVPerDiv()
     return mSupportedVPerDiv;
 }
 
-QList<double> SimulatorCaptureDevice::supportrdProbeMult()
-{
-    if (mSupportedVPerDiv.size() == 0)
-    {
-        mSupportedVPerDiv.append(1);
-        mSupportedVPerDiv.append(10);
-        mSupportedVPerDiv.append(100);
-    }
-
-    return mSupportedVPerDiv;
-}
-
-
 void SimulatorCaptureDevice::configureBeforeStart(QWidget* parent)
 {
     if (mConfigDialog == NULL) {
