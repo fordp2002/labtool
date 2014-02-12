@@ -1,5 +1,6 @@
 /*
- *  Copyright 2013 Embedded Artists AB
+ *  Copyright 2014 Simon R. Ellwood
+ *  This Analyzer by Simon R. Ellwood
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
