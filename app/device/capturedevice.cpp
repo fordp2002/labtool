@@ -89,7 +89,7 @@ CaptureDevice::~CaptureDevice()
 
     For a CaptureDevice volts per division is only related to analog signals.
 */
-QList<double> CaptureDevice::supportedVPerDiv()
+QList<double> CaptureDevice::supportedVPerDiv(double ProbeMult)
 {
     return QList<double>();
 }

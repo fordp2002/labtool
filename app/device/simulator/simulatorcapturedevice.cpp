@@ -99,11 +99,15 @@ int SimulatorCaptureDevice::maxNumAnalogSignals()
     return MaxAnalogSignals;
 }
 
-QList<double> SimulatorCaptureDevice::supportedVPerDiv()
+QList<double> SimulatorCaptureDevice::supportedVPerDiv(double ProbeMult)
 {
-    if (mSupportedVPerDiv.size() == 0) {
-        for(double i = 0.1; i < 5.0; i+= 0.1) {
-            mSupportedVPerDiv.append(i);
+    mSupportedVPerDiv.clear();
+
+    if (mSupportedVPerDiv.size() == 0)
+    {
+        for(double i = 0.1; i < 5.0; i+= 0.1)
+        {
+            mSupportedVPerDiv.append(i * ProbeMult);
         }
     }
 
@@ -592,13 +596,16 @@ QVector<int>* SimulatorCaptureDevice::AddDigitalData(double WaveSteps, QVector<i
     return data;
 }
 
-QVector<double>* SimulatorCaptureDevice::AddAnalogData(double WaveSteps, QVector<int>& WaveData, double HighValue, double LowValue)
+QVector<double>* SimulatorCaptureDevice::AddAnalogData(double WaveSteps, QVector<int>& WaveData, double HighValue, double LowValue, double ProbeMult)
 // Deallocation:
 //    Deleted by deleteSignalData() which is called by destructor or
 //    clearSignalData()
 {
     QVector<double>* data = NULL;
     int WaveSize            = WaveData.size();
+
+    HighValue /= ProbeMult;
+    LowValue /= ProbeMult;
 
     if (WaveSize >= 2)
     {
@@ -675,7 +682,7 @@ void SimulatorCaptureDevice::generateDALIAnalogSignals()
     QVector<int> DALIData   = DALIGen.DALIData();
     double DALISampleSteps  = ((double) mUsedSampleRate) / DALIGen.sampleRate();
 
-    QVector<double>* data = AddAnalogData(DALISampleSteps, DALIData, DALI_HIGH, DALI_LOW);
+    QVector<double>* data = AddAnalogData(DALISampleSteps, DALIData, DALI_HIGH, DALI_LOW, 10.0L);
 
     if (data)
     {

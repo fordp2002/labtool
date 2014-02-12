@@ -36,7 +36,7 @@ public:
     virtual QList<int> supportedSampleRates() = 0;
     virtual int maxNumDigitalSignals() = 0;
     virtual int maxNumAnalogSignals() = 0;
-    virtual QList<double> supportedVPerDiv();
+    virtual QList<double> supportedVPerDiv(double ProbeMult);
     virtual QList<double> supportrdProbeMult();
     virtual bool supportsContinuousCapture() {return false;}
 

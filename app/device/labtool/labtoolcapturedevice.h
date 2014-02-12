@@ -33,7 +33,7 @@ public:
     QList<int> supportedSampleRates();
     int maxNumDigitalSignals();
     int maxNumAnalogSignals();
-    QList<double> supportedVPerDiv();
+    QList<double> supportedVPerDiv(double ProbeMult);
     bool supportsContinuousCapture() {return true;}
 
     void configureTrigger(QWidget* parent);

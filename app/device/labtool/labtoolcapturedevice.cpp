@@ -326,17 +326,20 @@ int LabToolCaptureDevice::maxNumAnalogSignals()
     return MaxAnalogSignals;
 }
 
-QList<double> LabToolCaptureDevice::supportedVPerDiv()
+QList<double> LabToolCaptureDevice::supportedVPerDiv(double ProbeMult)
 {
-    if (mSupportedVPerDiv.size() == 0) {
-        mSupportedVPerDiv << 0.02
-                          << 0.05
-                          << 0.1
-                          << 0.2
-                          << 0.5
-                          << 1
-                          << 2
-                          << 5;
+    mSupportedVPerDiv.clear();
+
+    if (mSupportedVPerDiv.size() == 0)
+    {
+        mSupportedVPerDiv << (0.02  * ProbeMult)
+                          << (0.05  * ProbeMult)
+                          << (0.1   * ProbeMult)
+                          << (0.2   * ProbeMult)
+                          << (0.5   * ProbeMult)
+                          << (1     * ProbeMult)
+                          << (2     * ProbeMult)
+                          << (5     * ProbeMult);
     }
 
     return mSupportedVPerDiv;
@@ -1179,7 +1182,7 @@ void LabToolCaptureDevice::convertAnalogInput(const quint8 *pData, quint32 size,
 
     foreach(AnalogSignal* signal, mAnalogSignalList) {
         int id = signal->id();
-        int voltsPerDivIndex = supportedVPerDiv().indexOf(signal->vPerDiv());
+        int voltsPerDivIndex = supportedVPerDiv(1.0).indexOf(signal->vPerDiv());
         double a = calib->analogFactorA(id, voltsPerDivIndex);
         double b = calib->analogFactorB(id, voltsPerDivIndex);
 
@@ -1673,7 +1676,7 @@ qint16 LabToolCaptureDevice::analog12BitTriggerLevel(const AnalogSignal *signal)
     LabToolCalibrationData* calib = mDeviceComm->storedCalibrationData();
 
     int id = signal->id();
-    int voltsPerDivIndex = supportedVPerDiv().indexOf(signal->vPerDiv());
+    int voltsPerDivIndex = supportedVPerDiv(1.0).indexOf(signal->vPerDiv());
     double a = calib->analogFactorA(id, voltsPerDivIndex);
     double b = calib->analogFactorB(id, voltsPerDivIndex);
 
@@ -1892,7 +1895,7 @@ void LabToolCaptureDevice::updateAnalogConfigData()
 
         // Specify volt per div
         double vdiv = signal->vPerDiv();
-        int idx = supportedVPerDiv().indexOf(vdiv);
+        int idx = supportedVPerDiv(1.0).indexOf(vdiv);
         if (idx == -1) {
             qCritical("Volts per div %f is not one of the supported values", vdiv);
             header->voltPerDiv |= 0xf<<(id*4);//TODO: Report error as this case is invalid

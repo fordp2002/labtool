@@ -31,7 +31,7 @@ public:
     QList<int> supportedSampleRates();
     int maxNumDigitalSignals();
     int maxNumAnalogSignals();
-    QList<double> supportedVPerDiv();
+    QList<double> supportedVPerDiv(double ProbeMult);
 
     void configureBeforeStart(QWidget* parent);
     void start(int sampleRate);
@@ -76,7 +76,7 @@ private:
     int mTriggerIdx;
 
     QVector<int>*       AddDigitalData  (double WaveSteps, QVector<int>& WaveData);
-    QVector<double>*    AddAnalogData   (double WaveSteps, QVector<int>& WaveData, double HighValue, double LowValue);
+    QVector<double>*    AddAnalogData   (double WaveSteps, QVector<int>& WaveData, double HighValue, double LowValue, double ProbeMult);
 
     int numberOfSamples();
     void generateRandomDigitalSignals();

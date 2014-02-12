@@ -86,6 +86,7 @@ public:
     /*! The valid geometry of this signal */
     QRect geometry;
 
+    void ConfigureVPerDiv();
     void setup(AnalogSignal *signal, UiAnalogSignal *parent);
     void setGeometry(int x, int y, int w, int h);
     double calcPeakToPeak();
@@ -153,6 +154,24 @@ UiAnalogSignalPrivate::~UiAnalogSignalPrivate()
     delete mCouplingGroup;
 }
 
+void UiAnalogSignalPrivate::ConfigureVPerDiv()
+{
+    if (mSignal)
+    {
+        double ProbeMult = mSignal->vProbeMult();
+
+        CaptureDevice* device = DeviceManager::instance().activeDevice()->captureDevice();
+
+        if (device)
+        {
+            QList<double> vPerDivList = device->supportedVPerDiv(ProbeMult);
+            mVPerDivBox->setSupportedValues(vPerDivList);
+            double Range = mSignal->vPerDiv() * ProbeMult;
+            mVPerDivBox->setValue(Range);
+        }
+    }
+}
+
 /*!
     Initialize and setup UI elements related to the analog signal \a signal.
     The parameter \a parent is used as parent for the UI elements.
@@ -193,10 +212,7 @@ void UiAnalogSignalPrivate::setup(AnalogSignal* signal, UiAnalogSignal* parent)
     mVPerDivBox->setSuffix(" V/div");
     CaptureDevice* device = DeviceManager::instance().activeDevice()
             ->captureDevice();
-    QList<double> vPerDivList = device->supportedVPerDiv();
-
-    mVPerDivBox->setSupportedValues(vPerDivList);
-    mVPerDivBox->setValue(signal->vPerDiv());
+    ConfigureVPerDiv();
 
     parent->connect(mVPerDivBox, SIGNAL(valueChanged(double)),
                     parent, SLOT(changeVPerDiv(double)));
@@ -719,10 +735,12 @@ void UiAnalogSignal::changeVPerDiv(double v)
     for (int i = 0; i < mSignals.size(); i++) {
         UiAnalogSignalPrivate* p = mSignals.at(i);
 
-        if (p->mVPerDivBox == o) {
+        if (p->mVPerDivBox == o)
+        {
+            double ProbeMult = p->mSignal->vProbeMult();
 
-            p->mSignal->setVPerDiv(v);
-            p->mAnalogTrigger->setVPerDiv(v);
+            p->mSignal->setVPerDiv(v / ProbeMult);
+            p->mAnalogTrigger->setVPerDiv(v / ProbeMult);
 
             doLayout();
             update();
@@ -743,7 +761,7 @@ void UiAnalogSignal::changeProbeMult(double v)
         if (p->mProbeMultBox == o)
         {
             p->mSignal->setProbeMult(v);
-            //p->mAnalogTrigger->setProbeMult(v);
+            p->ConfigureVPerDiv();
 
             doLayout();
             update();
