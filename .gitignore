@@ -13,3 +13,5 @@ fw/program/uVision/Internal_SRAM/
 fw/program/uVision/*.dep
 fw/program/uVision/firmware.uvgui.*
 
+*.bak
+

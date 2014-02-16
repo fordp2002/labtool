@@ -61,7 +61,7 @@ QString StringUtil::timeInSecToString(double time)
             time*=1000;
         }
 
-        text.append(QString("%1").arg(neg*time));
+        text.append(QString::number(neg*time, 'g', 2)); //QString("%1.1f").arg(neg*time));
         switch (n) {
         case 0:
             text.append(" s");

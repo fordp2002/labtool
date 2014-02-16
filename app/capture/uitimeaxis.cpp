@@ -244,6 +244,8 @@ void UiTimeAxis::moveAxis(int differenceInPixels)
     update();
 }
 
+
+
 /*!
     Paint event handler responsible for painting this widget.
 */
@@ -252,18 +254,60 @@ void UiTimeAxis::paintEvent(QPaintEvent *event)
     (void)event;
     QPainter painter(this);
 
-    int plotWidth = width()-infoWidth();
-
-    int numMinorSteps = plotWidth
-            / (MajorStepPixelWidth/NumberOfMinorSteps) + 1;
+    int plotWidth = width() - infoWidth();
 
     painter.save();
     painter.translate(infoWidth(), 0);
 
-    for (int i = 0; i < numMinorSteps; i++) {
+#if 1
+    int MinorPixelWidth = MajorStepPixelWidth / NumberOfMinorSteps;
+    int x = -MajorStepPixelWidth;
+    int Offset = ((int) (((GetTimeForStep(0) / mMajorStepTime) * MajorStepPixelWidth) + 0.5)) % MajorStepPixelWidth;
+    //int Offset = 0;
+
+    while (1)
+    {
+        int x2 = x - Offset;
+
+        if (x2 >= plotWidth)
+        {
+          break;
+        }
+
+        if (x2 >= 0)
+        {
+            int stepHeight = 3;
+
+            if ((x % MajorStepPixelWidth) == 0)
+            {
+                stepHeight += 9;
+
+                double Step = ((double) x2) / (double) MajorStepPixelWidth;
+                QString stepText = getTimeLabelForStep(Step);
+                //double t = mMajorStepTime *- mRefTime
+                //QString stepText = StringUtil::timeInSecToString(t);
+
+                // draw text centered over a major step
+                int textWidth = painter.fontMetrics().width(stepText);
+                painter.drawText(x2 - (textWidth / 2), 10, stepText);
+            }
+
+            // draw minor/major step on the time axis
+            painter.drawLine(x2, height() - stepHeight, x2, height());
+        }
+
+        x += MinorPixelWidth;
+    }
+
+#else
+    int numMinorSteps = plotWidth / (MajorStepPixelWidth / NumberOfMinorSteps) + 1;
+
+    for (int i = 0; i < numMinorSteps; i++)
+    {
         int stepHeight = 3;
 
-        if (/*i > 0 &&*/ (i % NumberOfMinorSteps) == 0) {
+        if (/*i > 0 &&*/ (i % NumberOfMinorSteps) == 0)
+        {
             stepHeight += 9;
 
             QString stepText = getTimeLabelForStep(i/NumberOfMinorSteps);
@@ -272,7 +316,6 @@ void UiTimeAxis::paintEvent(QPaintEvent *event)
             int textWidth = painter.fontMetrics().width(stepText);
             painter.drawText((MajorStepPixelWidth/NumberOfMinorSteps)*i
                              - textWidth/2, 10, stepText);
-
         }
 
         // draw minor/major step on the time axis
@@ -281,6 +324,10 @@ void UiTimeAxis::paintEvent(QPaintEvent *event)
                          (MajorStepPixelWidth/NumberOfMinorSteps)*i,
                          height());
     }
+
+#endif
+
+
 
     painter.restore();
 }
@@ -314,23 +361,30 @@ void UiTimeAxis::updateRange()
             + mMajorStepTime*plotWidth/MajorStepPixelWidth;
 }
 
+double UiTimeAxis::GetTimeForStep(double majorStep)
+{
+    double t = mMajorStepTime * (majorStep - ((double) ReferenceMajorStep));
+
+    // Get time relative to trigger
+    CaptureDevice* device = DeviceManager::instance().activeDevice()->captureDevice();
+    double triggerTime = (double) device->digitalTriggerIndex() / device->usedSampleRate();
+
+    double Result = t - (triggerTime - mRefTime);
+
+    return Result;
+}
+
 /*!
     Get time label for given step \a majorStep.
 */
-QString UiTimeAxis::getTimeLabelForStep(int majorStep)
+QString UiTimeAxis::getTimeLabelForStep(double majorStep)
 {
-    double t = mMajorStepTime*(majorStep-ReferenceMajorStep);
-
-    // get time relative to trigger
-    CaptureDevice * device = DeviceManager::instance().activeDevice()
-            ->captureDevice();
-    double triggerTime = (double)device->digitalTriggerIndex()
-            / device->usedSampleRate();
-    t -= (triggerTime-mRefTime);
+    double t = GetTimeForStep(majorStep);
 
     QString result = StringUtil::timeInSecToString(t);
 
-    if (t > 0) {
+    if (t > 0)
+    {
         result.prepend("+");
     }
 

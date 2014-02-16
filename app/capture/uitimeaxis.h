@@ -74,7 +74,8 @@ private:
     double mRangeUpper;
 
     void updateRange();
-    QString getTimeLabelForStep(int majorStep);
+    double GetTimeForStep(double majorStep);
+    QString getTimeLabelForStep(double majorStep);
     int closestUnitDigit(double value);
     
 };
