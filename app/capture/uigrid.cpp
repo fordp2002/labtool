@@ -17,7 +17,7 @@
 
 #include <QPainter>
 #include <QDebug>
-
+#include "common/configuration.h"
 
 /*!
     \class UiGrid
@@ -59,14 +59,13 @@ void UiGrid::paintEvent(QPaintEvent *event)
         if (x > 0)
         {
             QPen pen = painter.pen();
-#if 0
-            if (i == UiTimeAxis::ReferenceMajorStep)
+
+            if ((i == UiTimeAxis::ReferenceMajorStep) && (Configuration::instance().ScrollingOn() == false))
             {
                 pen.setColor(Qt::black);
                 pen.setStyle(Qt::DashLine);
             }
             else
-#endif
             {
                 pen.setColor(Qt::gray);
                 pen.setStyle(Qt::DotLine);

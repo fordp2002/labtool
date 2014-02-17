@@ -268,7 +268,8 @@ void UiMainWindow::createOptionMenu()
     // Color scheme sub menu
     //
 
-    mColorSchemeMenu = menu->addMenu(tr("Color scheme"));
+    mColorSchemeMenu    = menu->addMenu(tr("Color scheme"));
+    mBehavoir           = menu->addMenu(tr("Behavoir"));
 
     //
     // Add supported schemes to sub menu
@@ -276,24 +277,51 @@ void UiMainWindow::createOptionMenu()
 
     QActionGroup* schemeGroup = new QActionGroup(this);
 
-    QList<QString> schemes = Configuration::instance().colorSchemes();
-    for (int i = 0; i < schemes.size(); i++) {
-        QString scheme = schemes.at(i);
-        QAction* action = new QAction(scheme, this);
-        action->setData(scheme);
-        action->setObjectName(scheme);
-        connect(action, SIGNAL(triggered()), this, SLOT(changeColorScheme()));
+    {
+        QList<QString> schemes = Configuration::instance().colorSchemes();
+        for (int i = 0; i < schemes.size(); i++)
+        {
+            QString scheme = schemes.at(i);
+            QAction* action = new QAction(scheme, this);
+            action->setData(scheme);
+            action->setObjectName(scheme);
+            connect(action, SIGNAL(triggered()), this, SLOT(changeColorScheme()));
 
-        action->setCheckable(true);
-        if (scheme == Configuration::instance().activeColorScheme()) {
-            action->setChecked(true);
+            action->setCheckable(true);
+            if (scheme == Configuration::instance().activeColorScheme()) {
+                action->setChecked(true);
+            }
+
+            mColorSchemeMenu->addAction(action);
+            schemeGroup->addAction(action);
         }
+    }
+    schemeGroup->setExclusive(true);
 
-        mColorSchemeMenu->addAction(action);
-        schemeGroup->addAction(action);
+    QActionGroup* behaveGroup = new QActionGroup(this);
+
+    {
+        QList<QString> behaviours = Configuration::instance().Behaviours();
+        for (int i = 0; i < behaviours.size(); i++)
+        {
+            QString behave = behaviours.at(i);
+            QAction* action = new QAction(behave, this);
+            action->setData(behave);
+            action->setObjectName(behave);
+            connect(action, SIGNAL(triggered()), this, SLOT(changeBehavoir()));
+
+            action->setCheckable(true);
+            if (behave == Configuration::instance().activeBehavoir())
+            {
+                action->setChecked(true);
+            }
+
+            mBehavoir->addAction(action);
+            behaveGroup->addAction(action);
+        }
     }
 
-    schemeGroup->setExclusive(true);
+    behaveGroup->setExclusive(true);
 }
 
 /*!
@@ -704,6 +732,31 @@ void UiMainWindow::changeColorScheme()
     }
 
     Configuration::instance().loadColorScheme(scheme);
+
+    mCapture->updateUi();
+}
+
+/*!
+    Called when the user changes the behavoir.
+*/
+void UiMainWindow::changeBehavoir()
+{
+
+    QList<QAction*> list = mBehavoir->actions();
+    QString behave = "";
+
+    // find selected device in device menu
+    for (int i = 0; i < list.size(); i++)
+    {
+        QAction* action = list.at(i);
+        if (action->isChecked())
+        {
+            behave = action->data().toString();
+            break;
+        }
+    }
+
+    Configuration::instance().loadBehavoir(behave);
 
     mCapture->updateUi();
 }

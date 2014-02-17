@@ -18,6 +18,9 @@
 #define COLOR_SCHEME_LIGHT "Light"
 #define COLOR_SCHEME_DARK  "Dark"
 
+#define BEHAVE_SCROLL      "Scrolling Grid/Ruler"
+#define BEHAVE_FIXED       "Fixed Grid/Ruler"
+
 const QString Configuration::ProjectFilename   = "Default.prj";
 const QString Configuration::ProjectFileExt    = ".prj";
 const QString Configuration::ProjectBinFileExt = ".eab";
@@ -63,6 +66,7 @@ const QString Configuration::ProjectBinFileExt = ".eab";
 Configuration::Configuration()
 {
     loadColorScheme(COLOR_SCHEME_LIGHT);
+    loadBehavoir(BEHAVE_SCROLL);
 }
 
 /*!
@@ -74,6 +78,17 @@ QList<QString> Configuration::colorSchemes()
             << COLOR_SCHEME_LIGHT
             << COLOR_SCHEME_DARK;
 }
+
+/*!
+    Returns a list of the color schemes defined for this applicaiton.
+*/
+QList<QString> Configuration::Behaviours()
+{
+    return QList<QString>()
+            << BEHAVE_FIXED
+            << BEHAVE_SCROLL;
+}
+
 
 /*!
     Returns the active color scheme.
@@ -94,6 +109,22 @@ void Configuration::loadColorScheme(QString scheme)
     else if (scheme == COLOR_SCHEME_DARK) {
         loadDarkScheme();
     }
+}
+
+/*!
+    Returns the active color scheme.
+*/
+QString Configuration::activeBehavoir()
+{
+    return mActiveBehavoir;
+}
+
+/*!
+    Load the Behavoir with name \a.
+*/
+void Configuration::loadBehavoir(QString behave)
+{
+    mActiveBehavoir = behave;
 }
 
 /*!
@@ -316,4 +347,9 @@ void Configuration::loadDarkScheme()
 
     mGridColor = Qt::gray;
 
+}
+
+bool Configuration::ScrollingOn()
+{
+    return (mActiveBehavoir == BEHAVE_SCROLL) ? true : false;
 }

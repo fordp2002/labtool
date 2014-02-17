@@ -21,6 +21,7 @@
 #include <qmath.h>
 
 #include "common/stringutil.h"
+#include "common/configuration.h"
 #include "device/devicemanager.h"
 
 /*!
@@ -266,98 +267,96 @@ void UiTimeAxis::paintEvent(QPaintEvent *event)
     painter.save();
     painter.translate(infoWidth(), 0);
 
-#if 1
-    int MinorPixelWidth = MajorStepPixelWidth / NumberOfMinorSteps;
-    int x = -MajorStepPixelWidth;
-    mOffset = ((int) (((GetTimeForStep(0) / mMajorStepTime) * MajorStepPixelWidth) + 0.5)) % MajorStepPixelWidth;
-    //int Offset = 0;
-
-    while (1)
+    if (Configuration::instance().ScrollingOn())
     {
-        int x2 = x - mOffset;
+        int MinorPixelWidth = MajorStepPixelWidth / NumberOfMinorSteps;
+        int x = -MajorStepPixelWidth;
+        mOffset = ((int) (((GetTimeForStep(0) / mMajorStepTime) * MajorStepPixelWidth) + 0.5)) % MajorStepPixelWidth;
+        //int Offset = 0;
 
-        if (x2 >= plotWidth)
+        while (1)
         {
-          break;
-        }
+            int x2 = x - mOffset;
 
-        if (x2 >= 0)
+            if (x2 >= plotWidth)
+            {
+              break;
+            }
+
+            if (x2 >= 0)
+            {
+                int stepHeight = 3;
+
+                if ((x % MajorStepPixelWidth) == 0)
+                {
+                    stepHeight += 9;
+
+                    double Step = ((double) x2) / (double) MajorStepPixelWidth;
+
+                    double Time = GetTimeForStep(Step);
+
+    //                if (Offset)
+                    {
+                        double Temp = Time / mMajorStepTime;
+                        if (Temp < 0)
+                        {
+                            Temp -= 0.5;
+                        }
+                        else
+                        {
+                            Temp += 0.5;
+                        }
+
+                        Time = ((int) Temp) * mMajorStepTime;
+                    }
+
+                    QString stepText = StringUtil::timeInSecToString(Time);
+
+                    if (Time > 0)
+                    {
+                        stepText.prepend("+");
+                    }
+
+                    // Draw text centered over a major step
+                    int textWidth = painter.fontMetrics().width(stepText);
+                    painter.drawText(x2 - (textWidth / 2), 10, stepText);
+                }
+
+                // draw minor/major step on the time axis
+                painter.drawLine(x2, height() - stepHeight, x2, height());
+            }
+
+            x += MinorPixelWidth;
+        }
+    }
+    else
+    {
+        mOffset = 0;
+        int numMinorSteps = plotWidth / (MajorStepPixelWidth / NumberOfMinorSteps) + 1;
+
+        for (int i = 0; i < numMinorSteps; i++)
         {
             int stepHeight = 3;
 
-            if ((x % MajorStepPixelWidth) == 0)
+            if (/*i > 0 &&*/ (i % NumberOfMinorSteps) == 0)
             {
                 stepHeight += 9;
 
-                double Step = ((double) x2) / (double) MajorStepPixelWidth;
+                QString stepText = getTimeLabelForStep(i/NumberOfMinorSteps);
 
-                double Time = GetTimeForStep(Step);
-
-//                if (Offset)
-                {
-                    double Temp = Time / mMajorStepTime;
-                    if (Temp < 0)
-                    {
-                        Temp -= 0.5;
-                    }
-                    else
-                    {
-                        Temp += 0.5;
-                    }
-
-                    Time = ((int) Temp) * mMajorStepTime;
-                }
-
-                QString stepText = StringUtil::timeInSecToString(Time);
-
-                if (Time > 0)
-                {
-                    stepText.prepend("+");
-                }
-
-                // Draw text centered over a major step
+                // draw text centered over a major step
                 int textWidth = painter.fontMetrics().width(stepText);
-                painter.drawText(x2 - (textWidth / 2), 10, stepText);
+                painter.drawText((MajorStepPixelWidth/NumberOfMinorSteps)*i
+                                 - textWidth/2, 10, stepText);
             }
 
             // draw minor/major step on the time axis
-            painter.drawLine(x2, height() - stepHeight, x2, height());
+            painter.drawLine((MajorStepPixelWidth/NumberOfMinorSteps)*i,
+                             height()-stepHeight,
+                             (MajorStepPixelWidth/NumberOfMinorSteps)*i,
+                             height());
         }
-
-        x += MinorPixelWidth;
     }
-
-#else
-
-    mOffset = 0;
-    int numMinorSteps = plotWidth / (MajorStepPixelWidth / NumberOfMinorSteps) + 1;
-
-    for (int i = 0; i < numMinorSteps; i++)
-    {
-        int stepHeight = 3;
-
-        if (/*i > 0 &&*/ (i % NumberOfMinorSteps) == 0)
-        {
-            stepHeight += 9;
-
-            QString stepText = getTimeLabelForStep(i/NumberOfMinorSteps);
-
-            // draw text centered over a major step
-            int textWidth = painter.fontMetrics().width(stepText);
-            painter.drawText((MajorStepPixelWidth/NumberOfMinorSteps)*i
-                             - textWidth/2, 10, stepText);
-        }
-
-        // draw minor/major step on the time axis
-        painter.drawLine((MajorStepPixelWidth/NumberOfMinorSteps)*i,
-                         height()-stepHeight,
-                         (MajorStepPixelWidth/NumberOfMinorSteps)*i,
-                         height());
-    }
-
-#endif
-
-
 
     painter.restore();
 }

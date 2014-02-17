@@ -38,6 +38,10 @@ public:
     QString activeColorScheme();
     void loadColorScheme(QString scheme);
 
+    QList<QString> Behaviours();
+    QString activeBehavoir();
+    void loadBehavoir(QString behave);
+
     QColor plotBackgroundColor();
     void   setPlotBackgroundColor(QColor &c);
     QColor textColor();
@@ -60,6 +64,7 @@ public:
 
     void loadLightScheme();
     void loadDarkScheme();
+    bool ScrollingOn();
 
 signals:
     
@@ -80,6 +85,7 @@ private:
     };    
 
     QString mActiveColorScheme;
+    QString mActiveBehavoir;
 
     QColor mPlotBackgroundColor;
     QColor mTextColor;
