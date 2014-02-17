@@ -130,7 +130,7 @@ void  UiTimeAxis::setReference(double value)
 */
 double UiTimeAxis::timeToPixel(double value)
 {
-    return value*MajorStepPixelWidth/mMajorStepTime;
+    return value * MajorStepPixelWidth / mMajorStepTime;
 }
 
 /*!
@@ -138,7 +138,7 @@ double UiTimeAxis::timeToPixel(double value)
 */
 double UiTimeAxis::pixelToTime(double value)
 {
-    return value*mMajorStepTime/MajorStepPixelWidth;
+    return value * mMajorStepTime / MajorStepPixelWidth;
 }
 
 /*!
@@ -159,7 +159,7 @@ double UiTimeAxis::pixelToTimeRelativeRef(double xcoord)
     // make xcoord relative to the plot area only
     xcoord -= infoWidth();
 
-    return (xcoord*mMajorStepTime) / (MajorStepPixelWidth) + mRangeLower;
+    return (xcoord * mMajorStepTime) / (MajorStepPixelWidth) + mRangeLower;
 }
 
 /*!
@@ -173,18 +173,25 @@ void UiTimeAxis::zoom(int steps, double xCenter)
 
     double factor = 0.5;
     int majorUnitValue = closestUnitDigit(mMajorStepTime);
-    if (steps < 0) {
+    if (steps < 0)
+    {
         steps = -steps;
         factor = 2.0;
         if (majorUnitValue == 2)
+        {
             factor = 2.5;
+        }
     }
-    else {
+    else
+    {
         factor = 0.5;
         if (majorUnitValue == 5)
+        {
             factor = 0.4;
+        }
     }
-    factor = factor*steps;
+
+    factor = factor * steps;
 
     newValue = mMajorStepTime * factor;
 
@@ -212,22 +219,22 @@ void UiTimeAxis::zoomAll(double lowerTime, double upperTime)
 
     setReference(mMajorStepTime);
     updateRange();
-    while (upperTime < mRangeUpper) {
+    while (upperTime < mRangeUpper)
+    {
         zoom(1, 0);
         setReference(mMajorStepTime);
         updateRange();
     }
 
-    while (upperTime > mRangeUpper) {
+    while (upperTime > mRangeUpper)
+    {
         zoom(-1, 0);
         setReference(mMajorStepTime);
         updateRange();
     }
 
-
     setReference(mMajorStepTime-(mRangeUpper-upperTime)/2);
     updateRange();
-
 }
 
 /*!
@@ -283,11 +290,32 @@ void UiTimeAxis::paintEvent(QPaintEvent *event)
                 stepHeight += 9;
 
                 double Step = ((double) x2) / (double) MajorStepPixelWidth;
-                QString stepText = getTimeLabelForStep(Step);
-                //double t = mMajorStepTime *- mRefTime
-                //QString stepText = StringUtil::timeInSecToString(t);
 
-                // draw text centered over a major step
+                double Time = GetTimeForStep(Step);
+
+//                if (Offset)
+                {
+                    double Temp = Time / mMajorStepTime;
+                    if (Temp < 0)
+                    {
+                        Temp -= 0.5;
+                    }
+                    else
+                    {
+                        Temp += 0.5;
+                    }
+
+                    Time = ((int) Temp) * mMajorStepTime;
+                }
+
+                QString stepText = StringUtil::timeInSecToString(Time);
+
+                if (Time > 0)
+                {
+                    stepText.prepend("+");
+                }
+
+                // Draw text centered over a major step
                 int textWidth = painter.fontMetrics().width(stepText);
                 painter.drawText(x2 - (textWidth / 2), 10, stepText);
             }
@@ -397,12 +425,13 @@ QString UiTimeAxis::getTimeLabelForStep(double majorStep)
 */
 int UiTimeAxis::closestUnitDigit(double value)
 {
-
-    while(value < 1) {
+    while (value < 1)
+    {
         value *= 10;
     }
 
-    while(value > 10) {
+    while (value > 10)
+    {
         value /= 10;
     }
 
