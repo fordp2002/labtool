@@ -56,6 +56,8 @@ public:
         MinRefTimeAsPowOf10 = -12
     };
 
+    int mOffset;
+
 signals:
 
 public slots:

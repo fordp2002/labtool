@@ -269,12 +269,12 @@ void UiTimeAxis::paintEvent(QPaintEvent *event)
 #if 1
     int MinorPixelWidth = MajorStepPixelWidth / NumberOfMinorSteps;
     int x = -MajorStepPixelWidth;
-    int Offset = ((int) (((GetTimeForStep(0) / mMajorStepTime) * MajorStepPixelWidth) + 0.5)) % MajorStepPixelWidth;
+    mOffset = ((int) (((GetTimeForStep(0) / mMajorStepTime) * MajorStepPixelWidth) + 0.5)) % MajorStepPixelWidth;
     //int Offset = 0;
 
     while (1)
     {
-        int x2 = x - Offset;
+        int x2 = x - mOffset;
 
         if (x2 >= plotWidth)
         {
@@ -328,6 +328,8 @@ void UiTimeAxis::paintEvent(QPaintEvent *event)
     }
 
 #else
+
+    mOffset = 0;
     int numMinorSteps = plotWidth / (MajorStepPixelWidth / NumberOfMinorSteps) + 1;
 
     for (int i = 0; i < numMinorSteps; i++)

@@ -52,23 +52,31 @@ void UiGrid::paintEvent(QPaintEvent *event)
     // draw grid for each main step
     int numMajorSteps = width() / UiTimeAxis::MajorStepPixelWidth + 1;
 
-    for (int i = 0; i < numMajorSteps; i++) {
+    for (int i = -1; i < numMajorSteps; i++)
+    {
+        int x = (i * UiTimeAxis::MajorStepPixelWidth) - mTimeAxis->mOffset;
 
-        QPen pen = painter.pen();
-        if (i == UiTimeAxis::ReferenceMajorStep) {
-            pen.setColor(Qt::black);
-            pen.setStyle(Qt::DashLine);
-        } else {
-            pen.setColor(Qt::gray);
-            pen.setStyle(Qt::DotLine);
+        if (x > 0)
+        {
+            QPen pen = painter.pen();
+#if 0
+            if (i == UiTimeAxis::ReferenceMajorStep)
+            {
+                pen.setColor(Qt::black);
+                pen.setStyle(Qt::DashLine);
+            }
+            else
+#endif
+            {
+                pen.setColor(Qt::gray);
+                pen.setStyle(Qt::DotLine);
+            }
+
+            painter.setPen(pen);
+
+
+            painter.drawLine(x, 2, x, height());
         }
-        painter.setPen(pen);
-
-        painter.drawLine(i*UiTimeAxis::MajorStepPixelWidth,
-                          2,
-                          i*UiTimeAxis::MajorStepPixelWidth,
-                          height());
-
     }
 
     painter.restore();
