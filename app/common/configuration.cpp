@@ -66,7 +66,7 @@ const QString Configuration::ProjectBinFileExt = ".eab";
 Configuration::Configuration()
 {
     loadColorScheme(COLOR_SCHEME_LIGHT);
-    loadBehavoir(BEHAVE_SCROLL);
+    loadBehavior(BEHAVE_SCROLL);
 }
 
 /*!
@@ -114,17 +114,17 @@ void Configuration::loadColorScheme(QString scheme)
 /*!
     Returns the active color scheme.
 */
-QString Configuration::activeBehavoir()
+QString Configuration::activeBehavior()
 {
-    return mActiveBehavoir;
+    return mActiveBehavior;
 }
 
 /*!
-    Load the Behavoir with name \a.
+    Load the Behavior with name \a.
 */
-void Configuration::loadBehavoir(QString behave)
+void Configuration::loadBehavior(QString behave)
 {
-    mActiveBehavoir = behave;
+    mActiveBehavior = behave;
 }
 
 /*!
@@ -351,5 +351,5 @@ void Configuration::loadDarkScheme()
 
 bool Configuration::ScrollingOn()
 {
-    return (mActiveBehavoir == BEHAVE_SCROLL) ? true : false;
+    return (mActiveBehavior == BEHAVE_SCROLL) ? true : false;
 }

@@ -57,7 +57,7 @@ private:
 
     QMenu* mDeviceMenu;
     QMenu* mColorSchemeMenu;
-    QMenu* mBehavoir;
+    QMenu* mBehavior;
 
     QLabel* mDeviceLabel;
 
@@ -91,7 +91,7 @@ private slots:
     void changeDevice();
     void changeDeviceStatus(Device* device);
     void changeColorScheme();
-    void changeBehavoir();
+    void changeBehavior();
 
     void newProject();
     void openProject();

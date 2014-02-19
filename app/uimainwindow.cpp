@@ -269,7 +269,7 @@ void UiMainWindow::createOptionMenu()
     //
 
     mColorSchemeMenu    = menu->addMenu(tr("Color scheme"));
-    mBehavoir           = menu->addMenu(tr("Behavoir"));
+    mBehavior           = menu->addMenu(tr("Behavior"));
 
     //
     // Add supported schemes to sub menu
@@ -308,15 +308,15 @@ void UiMainWindow::createOptionMenu()
             QAction* action = new QAction(behave, this);
             action->setData(behave);
             action->setObjectName(behave);
-            connect(action, SIGNAL(triggered()), this, SLOT(changeBehavoir()));
+            connect(action, SIGNAL(triggered()), this, SLOT(changeBehavior()));
 
             action->setCheckable(true);
-            if (behave == Configuration::instance().activeBehavoir())
+            if (behave == Configuration::instance().activeBehavior())
             {
                 action->setChecked(true);
             }
 
-            mBehavoir->addAction(action);
+            mBehavior->addAction(action);
             behaveGroup->addAction(action);
         }
     }
@@ -737,12 +737,12 @@ void UiMainWindow::changeColorScheme()
 }
 
 /*!
-    Called when the user changes the behavoir.
+    Called when the user changes the Behavior.
 */
-void UiMainWindow::changeBehavoir()
+void UiMainWindow::changeBehavior()
 {
 
-    QList<QAction*> list = mBehavoir->actions();
+    QList<QAction*> list = mBehavior->actions();
     QString behave = "";
 
     // find selected device in device menu
@@ -756,7 +756,7 @@ void UiMainWindow::changeBehavoir()
         }
     }
 
-    Configuration::instance().loadBehavoir(behave);
+    Configuration::instance().loadBehavior(behave);
 
     mCapture->updateUi();
 }

@@ -39,8 +39,8 @@ public:
     void loadColorScheme(QString scheme);
 
     QList<QString> Behaviours();
-    QString activeBehavoir();
-    void loadBehavoir(QString behave);
+    QString activeBehavior();
+    void loadBehavior(QString behave);
 
     QColor plotBackgroundColor();
     void   setPlotBackgroundColor(QColor &c);
@@ -85,7 +85,7 @@ private:
     };    
 
     QString mActiveColorScheme;
-    QString mActiveBehavoir;
+    QString mActiveBehavior;
 
     QColor mPlotBackgroundColor;
     QColor mTextColor;
